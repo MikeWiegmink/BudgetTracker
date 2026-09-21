@@ -1,0 +1,27 @@
+{
+  "name": "budgettracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node db.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MikeWiegmink/BudgetTracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/MikeWiegmink/BudgetTracker/issues"
+  },
+  "homepage": "https://github.com/MikeWiegmink/BudgetTracker#readme",
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1",
+    "zod": "^4.6.5"
+  }
+}
