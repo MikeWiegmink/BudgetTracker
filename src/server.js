@@ -25,3 +25,4 @@ app.get("/categories/:id", (req, res) => {
     const row = db.prepare("SELECT * FROM Categories WHERE id = ?").get(req.params.id);
     return row ? res.json(row) : res.status(404).json({ error: "Not found" });
 })
+
