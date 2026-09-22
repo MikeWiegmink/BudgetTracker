@@ -1,6 +1,6 @@
 import express from 'express';
 import db from './db.js';
-import { categorySchema } from './schema.js'
+import { categorySchema, transactionSchema } from './schema.js'
 
 const app = express();
 app.use(express.json());
@@ -38,4 +38,9 @@ app.post("/categories", (req, res) => {
     } catch (err) {
         res.status(400).json({ Error: err.errors });
     }
+})
+
+app.get("/transactions", (req, res) => {
+    const stmt = db.prepare("SELECT * FROM Transactions");
+    res.json(stmt.all());
 })
