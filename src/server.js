@@ -1,7 +1,9 @@
 import express from 'express';
 import db from './db.js';
+import { categorySchema } from './schema.js'
 
 const app = express();
+app.use(express.json());
 const PORT = 8080;
 
 app.listen(PORT, () => {
@@ -26,3 +28,14 @@ app.get("/categories/:id", (req, res) => {
     return row ? res.json(row) : res.status(404).json({ error: "Not found" });
 })
 
+app.post("/categories", (req, res) => {
+    try {
+        const data = categorySchema.parse(req.body);
+    
+        const info = db.prepare("INSERT INTO Categories (name) VALUES (?)").run(data.name);
+    
+        res.status(201).json({ id: info.lastInsertRowid, name: data.name });
+    } catch (err) {
+        res.status(400).json({ Error: err.errors });
+    }
+})
