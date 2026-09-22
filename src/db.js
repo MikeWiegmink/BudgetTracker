@@ -11,8 +11,8 @@ const query = `
     CREATE TABLE IF NOT EXISTS Transactions (
         id INTEGER PRIMARY KEY,
         amount INTEGER NOT NULL,
-        description TEXT NOT NULL,
-        date DATE NOT NULL,
+        desc TEXT NOT NULL,
+        date TEXT NOT NULL,
         category_id INTEGER REFERENCES Categories(id)
     );
 

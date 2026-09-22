@@ -44,3 +44,15 @@ app.get("/transactions", (req, res) => {
     const stmt = db.prepare("SELECT * FROM Transactions");
     res.json(stmt.all());
 })
+
+app.post("/transactions", (req, res) => {
+    try {
+        const data = transactionSchema.parse(req.body);
+    
+        const info = db.prepare("INSERT INTO Transactions (amount, desc, date, category_id) VALUES (?,?,?,?)").run(data.amount, data.desc, data.date, data.category_id);
+        
+        res.status(201).json({ id: info.lastInsertRowid, amount: data.amount, desc: data.desc, date: data.date, category_id: data.category_id})
+    } catch (err) {
+        res.status(400).json({ Error: err.errors })
+    }
+})
