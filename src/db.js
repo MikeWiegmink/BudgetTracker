@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 
-const db = new Database('app.db')
+const db = new Database(process.env.DB_PATH ?? 'app.db')
 
 const query = `
     CREATE TABLE IF NOT EXISTS Categories (
