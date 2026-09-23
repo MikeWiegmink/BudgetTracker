@@ -108,3 +108,21 @@ test("POST /categories rejects invalid name", async () => {
         await close();
     }
 });
+
+test("POST /categories rejects duplicate", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "utilities" }),
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.deepEqual(body, { error: 'Category already exists' })
+
+    } finally {
+        await close();
+    }
+});

@@ -13,6 +13,14 @@ app.get("/", (req, res) => {
     res.json({ status: "Hey, its home!" });
 })
 
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const PORT = 8080;
+  app.listen(PORT, () => {
+    console.log(`Its alive on http://localhost:${PORT}`);
+  });
+}
+
+// Categories
 app.get("/categories", (req, res) => {
     const stmt = db.prepare("SELECT * FROM Categories");
     res.status(200).json(stmt.all())
@@ -24,8 +32,18 @@ app.get("/categories/:id", (req, res) => {
 })
 
 app.post("/categories", (req, res) => {
+
+    const categoryExists = (name) => {
+        const row = db.prepare("SELECT * FROM Categories WHERE name = ?").get(name);
+        return row ? true : false;
+    }
+
     try {
         const data = categorySchema.parse(req.body);
+
+        if (categoryExists(data.name)) {
+            return res.status(400).json({ error: "Category already exists" })
+        }
 
         const info = db.prepare("INSERT INTO Categories (name) VALUES (?)").run(data.name);
 
@@ -35,6 +53,7 @@ app.post("/categories", (req, res) => {
     }
 })
 
+// Transactions
 app.get("/transactions", (req, res) => {
     const { date, category_id } = req.query;
 
@@ -80,12 +99,5 @@ app.post("/transactions", (req, res) => {
         res.status(400).json({ error: err.errors })
     }
 })
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-    const PORT = 8080;
-    app.listen(PORT, () => {
-        console.log(`Its alive on http://localhost:${PORT}`);
-    })
-}
 
 export default app;
