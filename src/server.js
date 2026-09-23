@@ -13,6 +13,14 @@ app.get("/", (req, res) => {
     res.json({ status: "Hey, its home!" });
 })
 
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const PORT = 8080;
+  app.listen(PORT, () => {
+    console.log(`Its alive on http://localhost:${PORT}`);
+  });
+}
+
+// Categories
 app.get("/categories", (req, res) => {
     const stmt = db.prepare("SELECT * FROM Categories");
     res.status(200).json(stmt.all())
@@ -24,8 +32,18 @@ app.get("/categories/:id", (req, res) => {
 })
 
 app.post("/categories", (req, res) => {
+
+    const categoryExists = (name) => {
+        const row = db.prepare("SELECT * FROM Categories WHERE name = ?").get(name);
+        return row ? true : false;
+    }
+
     try {
         const data = categorySchema.parse(req.body);
+
+        if (categoryExists(data.name)) {
+            return res.status(409).json({ error: "Category already exists" })
+        }
 
         const info = db.prepare("INSERT INTO Categories (name) VALUES (?)").run(data.name);
 
@@ -35,6 +53,62 @@ app.post("/categories", (req, res) => {
     }
 })
 
+app.delete("/categories", (req, res) => {
+    const { id } = req.query;
+    if (!id) return res.status(400).json({ error: "No id provided" });
+
+    try {
+        const info = db.prepare("DELETE FROM Categories WHERE id = ?").run(id);
+        if (info.changes) {
+            return res.status(204).end();
+        }
+        res.status(404).json({ error: "Category does not exist" });
+    } catch (err) {
+        res.status(400).json({ error: err.errors });
+    }
+})
+
+app.put("/categories", (req, res) => {
+    const { id, name, newName } = req.query;
+
+    if (!id || !name || !newName) {
+        return res.status(400).json({ error: "missing parameters" })
+    }
+
+    const categoryExists = (id, name) => {
+        const row = db.prepare("SELECT id FROM Categories WHERE id = ? AND name = ?").get(id, name);
+        return row ? true : false;
+    }
+
+    const newNameAvailable = (newName) => {
+        const row = db.prepare("SELECT * FROM Categories WHERE name = ?").get(newName);
+        return row ? false : true;
+    }
+
+    try {
+        if (!categoryExists(id, name)) {
+            return res.status(404).json({ error: "Could not find correct category" });
+        }
+
+        const data = categorySchema.parse({ name: newName });
+
+        if (!newNameAvailable(data.name)) {
+            return res.status(409).json({ error: "Name is already taken" });
+        }
+
+        const info = db.prepare("UPDATE Categories SET name = ? WHERE id = ?").run(data.name, id);
+
+        if (info.changes) {
+            return res.status(200).json({ succes: info.changes})
+        }
+
+        return res.status(400).json({ error:"Unable to update row" })
+    } catch (err) {
+        res.status(400).json({ error: err.errors });
+    }
+})
+
+// Transactions
 app.get("/transactions", (req, res) => {
     const { date, category_id } = req.query;
 
@@ -80,12 +154,5 @@ app.post("/transactions", (req, res) => {
         res.status(400).json({ error: err.errors })
     }
 })
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-    const PORT = 8080;
-    app.listen(PORT, () => {
-        console.log(`Its alive on http://localhost:${PORT}`);
-    })
-}
 
 export default app;

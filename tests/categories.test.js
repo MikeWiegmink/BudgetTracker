@@ -108,3 +108,124 @@ test("POST /categories rejects invalid name", async () => {
         await close();
     }
 });
+
+test("POST /categories rejects duplicate", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "utilities" }),
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 409);
+        assert.deepEqual(body, { error: 'Category already exists' })
+
+    } finally {
+        await close();
+    }
+});
+
+test("DELETE /categories returns correct status on valid request", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories?id=6`, {
+            method: "DELETE",
+        });
+
+        assert.equal(res.status, 204);
+    } finally {
+        await close();
+    }
+})
+
+test("PUT /categories returns correct status on valid edit", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories?id=3&name=subscriptions&newName=car`, {
+        method: "PUT",
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+    } finally {
+        await close();
+    }
+});
+
+test("PUT /categories returns correct status on (invalid) taken name", async () => {
+  const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(
+        `${baseUrl}/categories?id=2&name=savings&newName=groceries`,
+        {
+            method: "PUT",
+        },
+        );
+        const body = await res.json();
+
+        assert.equal(res.status, 409);
+        assert.deepEqual(body, { error: "Name is already taken" });
+    } finally {
+        await close();
+    }
+});
+
+test("GET /categories return correct row after PUT", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories/3`);
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+        assert.deepEqual(body, { id: 3, name: "car"})
+    } finally {
+        await close();
+    }
+})
+
+test("DELETE /categories returns correct status on invalid request", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories?id=6`, {
+            method: "DELETE",
+        });
+        const body = await res.json()
+
+        assert.equal(res.status, 404);
+        assert.deepEqual(body, { error: "Category does not exist" })
+    } finally {
+        await close();
+    }
+});
+
+test("DELETE /categories rejects request with no id", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories`, {
+            method: "DELETE",
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.deepEqual(body, { error: "No id provided" });
+    } finally {
+        await close();
+    }
+});
+
+test("PUT /categories rejects request with missing parameters", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories?id=1&name=groceries`, {
+            method: "PUT",
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.deepEqual(body, { error: "missing parameters" });
+    } finally {
+        await close();
+    }
+});
