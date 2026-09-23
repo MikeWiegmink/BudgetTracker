@@ -4,11 +4,6 @@ import { categorySchema, transactionSchema } from './schema.js'
 
 const app = express();
 app.use(express.json());
-const PORT = 8080;
-
-app.listen(PORT, () => {
-    console.log(`Its alive on http://localhost:${PORT}`);
-})
 
 app.get("/health", (req, res) => {
     res.json({ status: "ok" });
@@ -20,12 +15,12 @@ app.get("/", (req, res) => {
 
 app.get("/categories", (req, res) => {
     const stmt = db.prepare("SELECT * FROM Categories");
-    res.json(stmt.all())
+    res.status(200).json(stmt.all())
 })
 
 app.get("/categories/:id", (req, res) => {
     const row = db.prepare("SELECT * FROM Categories WHERE id = ?").get(req.params.id);
-    return row ? res.json(row) : res.status(404).json({ error: "Not found" });
+    return row ? res.status(200).json(row) : res.status(404).json({ error: "Not found" });
 })
 
 app.post("/categories", (req, res) => {
@@ -36,7 +31,7 @@ app.post("/categories", (req, res) => {
 
         res.status(201).json({ id: info.lastInsertRowid, name: data.name });
     } catch (err) {
-        res.status(400).json({ Error: err.errors });
+        res.status(400).json({ error: err.errors });
     }
 })
 
@@ -75,13 +70,22 @@ app.post("/transactions", (req, res) => {
         const data = transactionSchema.parse(req.body);
 
         if (!categoryExists(data.category_id)) {
-            return res.status(400).json({ Error: `Category ${data.category_id} does not exist.`})
+            return res.status(400).json({ error: `Category ${data.category_id} does not exist.`})
         }
 
         const info = db.prepare("INSERT INTO Transactions (amount, desc, date, category_id) VALUES (?,?,?,?)").run(data.amount, data.desc, data.date, data.category_id);
 
         res.status(201).json({ id: info.lastInsertRowid, amount: data.amount, desc: data.desc, date: data.date, category_id: data.category_id})
     } catch (err) {
-        res.status(400).json({ Error: err.errors })
+        res.status(400).json({ error: err.errors })
     }
 })
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+    const PORT = 8080;
+    app.listen(PORT, () => {
+        console.log(`Its alive on http://localhost:${PORT}`);
+    })
+}
+
+export default app;
