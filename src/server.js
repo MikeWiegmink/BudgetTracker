@@ -53,6 +53,21 @@ app.post("/categories", (req, res) => {
     }
 })
 
+app.delete("/categories", (req, res) => {
+    const { id } = req.query
+    if (!id) return res.status(404).json({ error: "No id provided" });
+
+    try {
+        const info = db.prepare("DELETE FROM Categories WHERE id = ?").run(id);
+        if (info.changes) {
+            return res.status(204).end();
+        }
+        res.status(404).json({ error: "Category does not exist" })
+    } catch (err) {
+        res.status(400).json({ error: err.errors })
+    }
+})
+
 // Transactions
 app.get("/transactions", (req, res) => {
     const { date, category_id } = req.query;

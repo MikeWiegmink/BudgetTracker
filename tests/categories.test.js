@@ -126,3 +126,31 @@ test("POST /categories rejects duplicate", async () => {
         await close();
     }
 });
+
+test("DELETE /categories returns correct status on valid request", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+    const res = await fetch(`${baseUrl}/categories?id=6`, {
+        method: "DELETE",
+    });
+
+    assert.equal(res.status, 204);
+    } finally {
+        await close();
+    }
+})
+
+test("DELETE /categories returns correct status on invalid request", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories?id=6`, {
+            method: "DELETE",
+        });
+        const body = await res.json()
+
+        assert.equal(res.status, 404);
+        assert.deepEqual(body, { error: "Category does not exist" })
+    } finally {
+        await close();
+    }
+});
