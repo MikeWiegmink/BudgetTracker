@@ -49,7 +49,7 @@ app.post("/categories", (req, res) => {
 
         res.status(201).json({ id: info.lastInsertRowid, name: data.name });
     } catch (err) {
-        res.status(400).json({ error: err.errors });
+        res.status(400).json({ error: err.issues ?? err.message });
     }
 })
 
@@ -64,7 +64,7 @@ app.delete("/categories", (req, res) => {
         }
         res.status(404).json({ error: "Category does not exist" });
     } catch (err) {
-        res.status(400).json({ error: err.errors });
+        res.status(400).json({ error: err.issues ?? err.message });
     }
 })
 
@@ -104,7 +104,7 @@ app.put("/categories", (req, res) => {
 
         return res.status(400).json({ error:"Unable to update row" })
     } catch (err) {
-        res.status(400).json({ error: err.errors });
+        res.status(400).json({ error: err.issues ?? err.message });
     }
 })
 
@@ -151,11 +151,64 @@ app.post("/transactions", (req, res) => {
 
         res.status(201).json({ id: info.lastInsertRowid, amount: data.amount, desc: data.desc, date: data.date, category_id: data.category_id})
     } catch (err) {
-        res.status(400).json({ error: err.errors })
+        res.status(400).json({ error: err.issues ?? err.message })
     }
 })
 
-// app.put
-// app.delete
+app.delete("/transactions", (req, res) => {
+    const { id } = req.query;
+    if (!id) return res.status(400).json({ error: "No id provided" });
+
+    try {
+        const info = db.prepare("DELETE FROM Transactions WHERE id = ?").run(id);
+        if (info.changes) {
+            return res.status(204).end()
+        }
+        res.status(404).json({ error: "Transaction does not exist "})
+    } catch (err) {
+        res.status(400).json({ error: err.issues ?? err.message })
+    }
+})
+
+app.put("/transactions", (req, res) => {
+    const { id, amount, desc, date, category_id} = req.query;
+    if (!id || !amount || !desc || !date || !category_id ) {
+        return res.status(400).json({ error: "Missing parameters" });
+    }
+
+    const getTransaction = (id) => {
+        return db.prepare("SELECT * FROM Transactions WHERE id = ?").get(id);
+    }
+
+    const transactionExists = (id) => {
+        const row = getTransaction(id);
+        return row ? true : false
+    }
+
+    const categoryExists = (id) => {
+        const row = db.prepare("SELECT * FROM Categories WHERE id = ?").get(id);
+        return row ? true : false
+    }
+
+    try {
+        if (!transactionExists(id)) {
+            return res.status(404).json({ error: "Transaction does not exist" });
+        }
+        const data = transactionSchema.parse({ amount: Number(amount), desc: desc, date: date, category_id: Number(category_id) });
+
+        if (!categoryExists(data.category_id)) {
+            return res.status(400).json({ error: `Category ${data.category_id} does not exist.`})
+        }
+
+        const info = db.prepare("UPDATE Transactions SET amount = ?, desc = ?, date = ?, category_id = ? WHERE id = ?").run(data.amount, data.desc, data.date, data.category_id, id)
+        if (info.changes) {
+            return res.status(200).json({ info: info.changes })
+        }
+
+        return res.status(400).json({ error: "Unable to update row" })
+    } catch (err) {
+        res.status(400).json({ error: err.issues ?? err.message });
+    }
+})
 
 export default app;
