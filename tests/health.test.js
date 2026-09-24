@@ -15,3 +15,17 @@ test('GET /health returns ok status', async () => {
         await close();
     }
 });
+
+test('GET / returns home message', async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/`);
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+        assert.deepEqual(body, { status: 'Hey, its home!' });
+    } finally {
+        await close();
+    }
+});

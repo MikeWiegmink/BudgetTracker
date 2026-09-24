@@ -229,3 +229,18 @@ test("PUT /categories rejects request with missing parameters", async () => {
         await close();
     }
 });
+
+test("PUT /categories returns 404 when id and name do not match", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories?id=1&name=wrongname&newName=whatever`, {
+            method: "PUT",
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 404);
+        assert.deepEqual(body, { error: "Could not find correct category" });
+    } finally {
+        await close();
+    }
+});
