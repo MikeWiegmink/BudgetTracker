@@ -155,7 +155,21 @@ app.post("/transactions", (req, res) => {
     }
 })
 
+app.delete("/transactions", (req, res) => {
+    const { id } = req.query;
+    if (!id) return res.status(400).json({ error: "No id provided" });
+
+    try {
+        const info = db.prepare("DELETE FROM Transactions WHERE id = ?").run(id);
+        if (info.changes) {
+            return res.status(204).end()
+        }
+        res.status(404).json({ error: "Transaction does not exist "})
+    } catch (err) {
+        res.status(400).json({ error: err.errors })
+    }
+})
+
 // app.put
-// app.delete
 
 export default app;

@@ -165,3 +165,50 @@ test("POST /transactions rejects non-existent category_id", async () => {
         await close();
     }
 });
+
+test("DELETE /transactions returns correct status on valid request", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/transactions?id=3`, {
+            method: "DELETE",
+        });
+
+        assert.equal(res.status, 204);
+    } finally {
+        await close();
+    }
+})
+
+test("DELETE /transactions returns correct status on invalid request", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/transactions?id=999`, {
+        method: "DELETE",
+        });
+
+        const body = await res.json()
+
+        assert.equal(res.status, 404);
+        assert.deepEqual(body, { error: "Transaction does not exist " });
+    } finally {
+        await close();
+    }
+});
+
+test("DELETE /transactions returns correct status on missing parameter", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/transactions`, {
+        method: "DELETE",
+        });
+
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.deepEqual(body, { error: "No id provided" });
+    } finally {
+        await close();
+    }
+});
+
+
