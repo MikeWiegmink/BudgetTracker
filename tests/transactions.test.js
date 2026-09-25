@@ -16,6 +16,32 @@ test("GET /transactions returns all rows", async () => {
     }
 });
 
+test("GET /transactions/:id returns correct row", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/transactions/2`)
+        const body = await res.json();
+
+        assert.equal(res.status, 200)
+        assert.equal(body.id, 2)
+    } finally {
+        await close()
+    }
+})
+
+test("GET /transactions/:id returns correct on invalid request", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/transactions/900`);
+
+        assert.equal(res.status, 404);
+    } finally {
+        await close();
+    }
+});
+
 test("GET /transactions filters by category_id", async () => {
     const { baseUrl, close } = await startTestServer();
 
@@ -357,6 +383,112 @@ test("POST /transactions returns validation issues in error body", async () => {
         assert.equal(res.status, 400);
         assert.ok(Array.isArray(body.error));
         assert.ok(body.error.some((issue) => issue.path.includes("amount")));
+    } finally {
+        await close();
+    }
+});
+
+test("POST /transactions rejects empty desc", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/transactions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 30, desc: "", date: "2026-09-23", category_id: 1 }),
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.ok(body.error.some((issue) => issue.path.includes("desc")));
+    } finally {
+        await close();
+    }
+});
+
+test("POST /transactions rejects invalid date", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        for (const date of ["not-a-date", "2026/09/23", "2026-02-30"]) {
+            const res = await fetch(`${baseUrl}/transactions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: 30, desc: "Coffee", date, category_id: 1 }),
+            });
+            const body = await res.json();
+
+            assert.equal(res.status, 400, `expected 400 for date "${date}"`);
+            assert.ok(body.error.some((issue) => issue.path.includes("date")));
+        }
+    } finally {
+        await close();
+    }
+});
+
+test("POST /transactions accepts a negative amount", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/transactions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: -25, desc: "Refund", date: "2026-09-23", category_id: 1 }),
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 201);
+        assert.equal(body.amount, -25);
+    } finally {
+        await close();
+    }
+});
+
+test("PUT /transactions accepts amount=0", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/transactions?id=2&amount=0&desc=free&date=2026-09-18&category_id=3`, {
+            method: "PUT",
+        });
+        assert.equal(res.status, 200);
+
+        const row = await (await fetch(`${baseUrl}/transactions/2`)).json();
+        assert.equal(row.amount, 0);
+        assert.equal(row.desc, "free");
+    } finally {
+        await close();
+    }
+});
+
+test("PUT /transactions rejects empty desc", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const before = await (await fetch(`${baseUrl}/transactions/1`)).json();
+
+        const res = await fetch(`${baseUrl}/transactions?id=1&amount=900&desc=&date=1990-03-01&category_id=2`, {
+            method: "PUT",
+        });
+        assert.equal(res.status, 400);
+
+        const after = await (await fetch(`${baseUrl}/transactions/1`)).json();
+        assert.deepEqual(after, before);
+    } finally {
+        await close();
+    }
+});
+
+test("PUT /transactions rejects invalid date", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const before = await (await fetch(`${baseUrl}/transactions/1`)).json();
+
+        const res = await fetch(`${baseUrl}/transactions?id=1&amount=900&desc=house&date=not-a-date&category_id=2`, {
+            method: "PUT",
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.ok(body.error.some((issue) => issue.path.includes("date")));
+
+        const after = await (await fetch(`${baseUrl}/transactions/1`)).json();
+        assert.deepEqual(after, before);
     } finally {
         await close();
     }
