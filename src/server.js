@@ -133,6 +133,21 @@ app.get("/transactions", (req, res) => {
     res.json(stmt.all(...params));
 })
 
+app.get("/transactions/:id", (req, res) => {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: "No id provided" });
+
+    try {
+        const row = db.prepare("SELECT * FROM Transactions WHERE id = ?").get(id);
+        if (!row) {
+            return res.status(404).json({ error: "Transaction not found" });
+        }
+        return res.status(200).json(row)
+    } catch (err) {
+        res.status(400).json({ error: err.issues ?? err.message })
+    }
+})
+
 app.post("/transactions", (req, res) => {
 
     const categoryExists = (id) => {
