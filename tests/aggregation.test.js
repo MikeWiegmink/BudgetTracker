@@ -52,7 +52,7 @@ test("GET /summary returns correct only date", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.deepEqual(body, {month: "2026-09", total: 305, average: 61 })
+        assert.deepEqual(body, {month: "2026-09", total: 305, average: 61, max: 100 })
     } finally {
         await close()
     }
@@ -66,7 +66,7 @@ test("GET /summary returns correct only category_id", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.deepEqual(body, { total: 120, average: 40 })
+        assert.deepEqual(body, { total: 120, average: 40, max: 60 })
     } finally {
         await close()
     }
@@ -80,7 +80,7 @@ test("GET /summary returns correct date & category_id", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.deepEqual(body, { month: "2026-08", total: 60, average: 30 })
+        assert.deepEqual(body, { month: "2026-08", total: 60, average: 30, max: 40 })
     } finally {
         await close()
     }

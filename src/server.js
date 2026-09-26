@@ -271,8 +271,11 @@ app.get("/summary", (req, res) => {
         const { average } = db
             .prepare(`SELECT AVG(amount) AS average FROM Transactions WHERE ${conditions.join(" AND ")}`)
             .get(...params)
+        const { max } = db
+            .prepare(`SELECT MAX(amount) AS max FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params)
 
-        return res.status(200).json({ month, total, average });
+        return res.status(200).json({ month, total, average, max });
     } catch (err) {
         return res.status(400).json({ error: err.issues ?? err.message })
     }
