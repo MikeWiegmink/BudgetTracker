@@ -10,7 +10,7 @@ test("GET /transactions returns all rows", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.equal(body.length, 8);
+        assert.equal(body.length, 11);
     } finally {
         await close();
     }

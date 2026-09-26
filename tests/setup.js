@@ -17,6 +17,9 @@ const transactions = [
     date: "2026-07-01",
     category_id: 2,
   },
+  { id: 9, amount: 20, desc: "Albert Heijn", date: "2026-08-12", category_id: 1 },
+  { id: 10, amount: 60, desc: "Lidl", date: "2026-10-03", category_id: 1 },
+  { id: 11, amount: 45, desc: "Train ticket", date: "2026-10-15", category_id: 5 },
 ];
 
 

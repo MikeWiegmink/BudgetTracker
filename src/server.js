@@ -230,34 +230,47 @@ app.put("/transactions", (req, res) => {
 
 // Total per month
 app.get("/summary", (req, res) => {
-    const { date } = req.query;
+    const { date, category_id } = req.query;
 
-    if (!date) {
-        return res.status(400).json({ error: "No date provided" });
+    if (!date && !category_id) {
+        return res.status(400).json({ error: "No parameters provided" });
     }
 
-    const match = date.match(/^(\d{4}-\d{2})(-\d{2})?$/);
-    if (!match) {
-        return res.status(400).json({ error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" });
-    }
-    const month = match[1];
+    const conditions = [];
+    const params = [];
 
-    const monthHasTransactions = (month) => {
-        const row = db.prepare("SELECT * FROM Transactions WHERE date LIKE ?").get(`${month}%`);
-        return row ? true : false
+    let month;
+    if (date) {
+        const match = date.match(/^(\d{4}-\d{2})(-\d{2})?$/);
+        if (!match) {
+            return res.status(400).json({ error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" });
+        }
+        month = match[1];
+        conditions.push("date LIKE ?");
+        params.push(`${month}%`);
+    }
+
+    if (category_id) {
+        conditions.push("category_id = ?");
+        params.push(category_id);
     }
 
     try {
-        if (!monthHasTransactions(month)) {
-            return res.status(404).json({ error: "No transactions found in that month" })
+        const row = db
+            .prepare(`SELECT 1 FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params);
+        if (!row) {
+            return res.status(404).json({
+                error: month ? "No transactions found in that month" : "No transactions found",
+            });
         }
-        
+
         const { total } = db
-            .prepare("SELECT SUM(amount) AS total FROM Transactions WHERE date LIKE ?")
-            .get(`${month}%`);
+            .prepare(`SELECT SUM(amount) AS total FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params);
         const { average } = db
-            .prepare("SELECT AVG(amount) AS average FROM Transactions WHERE date LIKE ?")
-            .get(`${month}%`)
+            .prepare(`SELECT AVG(amount) AS average FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params)
 
         return res.status(200).json({ month, total, average });
     } catch (err) {
