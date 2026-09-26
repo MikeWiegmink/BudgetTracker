@@ -226,4 +226,43 @@ app.put("/transactions", (req, res) => {
     }
 })
 
+// Aggregation
+
+// Total per month
+app.get("/summary", (req, res) => {
+    const { date } = req.query;
+
+    if (!date) {
+        return res.status(400).json({ error: "No date provided" });
+    }
+
+    const match = date.match(/^(\d{4}-\d{2})(-\d{2})?$/);
+    if (!match) {
+        return res.status(400).json({ error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" });
+    }
+    const month = match[1];
+
+    const monthHasTransactions = (month) => {
+        const row = db.prepare("SELECT * FROM Transactions WHERE date LIKE ?").get(`${month}%`);
+        return row ? true : false
+    }
+
+    try {
+        if (!monthHasTransactions(month)) {
+            return res.status(404).json({ error: "No transactions found in that month" })
+        }
+        
+        const { total } = db
+            .prepare("SELECT SUM(amount) AS total FROM Transactions WHERE date LIKE ?")
+            .get(`${month}%`);
+        const { average } = db
+            .prepare("SELECT AVG(amount) AS average FROM Transactions WHERE date LIKE ?")
+            .get(`${month}%`)
+
+        return res.status(200).json({ month, total, average });
+    } catch (err) {
+        return res.status(400).json({ error: err.issues ?? err.message })
+    }
+})
+
 export default app;
