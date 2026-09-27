@@ -226,4 +226,87 @@ app.put("/transactions", (req, res) => {
     }
 })
 
+// Aggregation
+
+// Total per month
+app.get("/summary", (req, res) => {
+    const { date, category_id } = req.query;
+
+    if (!date && !category_id) {
+        return res.status(400).json({ error: "No parameters provided" });
+    }
+
+    const conditions = [];
+    const params = [];
+
+    let month;
+    if (date) {
+        const match = date.match(/^(\d{4}-\d{2})(-\d{2})?$/);
+        if (!match) {
+            return res.status(400).json({ error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" });
+        }
+        month = match[1];
+        conditions.push("date LIKE ?");
+        params.push(`${month}%`);
+    }
+
+    if (category_id) {
+        conditions.push("category_id = ?");
+        params.push(category_id);
+    }
+
+    try {
+        const row = db
+            .prepare(`SELECT 1 FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params);
+        if (!row) {
+            return res.status(404).json({
+                error: month ? "No transactions found in that month" : "No transactions found",
+            });
+        }
+
+        const { total } = db
+            .prepare(`SELECT SUM(amount) AS total FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params);
+        const { average } = db
+            .prepare(`SELECT AVG(amount) AS average FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params)
+        const { max } = db
+            .prepare(`SELECT MAX(amount) AS max FROM Transactions WHERE ${conditions.join(" AND ")}`)
+            .get(...params)
+
+        return res.status(200).json({
+            month: month ?? null,
+            total,
+            average: Math.round(average * 100) / 100,
+            max,
+        });
+    } catch (err) {
+        return res.status(400).json({ error: err.issues ?? err.message })
+    }
+})
+
+app.get("/commoncategory", (req, res) => {
+    const { date } = req.query;
+
+    if (!date) {
+        return res.status(400).json({ error: "No parameters provided"})
+    }
+
+    const match = date.match(/^(\d{4}-\d{2})(-\d{2})?$/);
+    if (!match) {
+        return res.status(400).json({ error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" });
+    }
+    const month = match[1];
+
+    try {
+        const categories = db
+            .prepare("SELECT C.name, COUNT(*) AS count FROM Transactions T JOIN Categories C ON T.category_id = C.id WHERE date LIKE ? GROUP BY T.category_id ORDER BY count DESC")
+            .all(`${month}%`);
+        return res.status(200).json({ month, categories })
+    } catch (err) {
+        return res.status(400).json({ error: err.issues ?? err.message })
+    }
+})
+
 export default app;
