@@ -16,7 +16,7 @@ test("GET /summary missing parameter", async () => {
     }
 })
 
-test("GET /summary wrong parameter", async () => {
+test("GET /summary wrong parameter 1", async () => {
     const { baseUrl, close } = await startTestServer();
 
     try {
@@ -25,6 +25,20 @@ test("GET /summary wrong parameter", async () => {
 
         assert.equal(res.status, 400);
         assert.deepEqual(body, { error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" })
+    } finally {
+        await close();
+    }
+})
+
+test("GET /summary wrong parameter 2", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/summary?category_id=Test`);
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.deepEqual(body, { error: "category_id must be an integer" })
     } finally {
         await close();
     }

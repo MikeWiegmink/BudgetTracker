@@ -228,7 +228,7 @@ app.put("/transactions", (req, res) => {
 
 // Aggregation
 
-// Total per month
+// returns the month, total, average and max of given month and/or category
 app.get("/summary", (req, res) => {
     const { date, category_id } = req.query;
 
@@ -251,29 +251,24 @@ app.get("/summary", (req, res) => {
     }
 
     if (category_id) {
+        const parsedCategoryId = Number(category_id);
+        if (!Number.isInteger(parsedCategoryId)) {
+            return res.status(400).json({ error: "category_id must be an integer" });
+        }
         conditions.push("category_id = ?");
-        params.push(category_id);
+        params.push(parsedCategoryId);
     }
 
     try {
-        const row = db
-            .prepare(`SELECT 1 FROM Transactions WHERE ${conditions.join(" AND ")}`)
+        const { total, average, max } = db
+            .prepare(`SELECT SUM(amount) AS total, AVG(amount) AS average, MAX(amount) AS max FROM Transactions WHERE ${conditions.join(" AND ")}`)
             .get(...params);
-        if (!row) {
+
+        if (total === null) {
             return res.status(404).json({
                 error: month ? "No transactions found in that month" : "No transactions found",
             });
         }
-
-        const { total } = db
-            .prepare(`SELECT SUM(amount) AS total FROM Transactions WHERE ${conditions.join(" AND ")}`)
-            .get(...params);
-        const { average } = db
-            .prepare(`SELECT AVG(amount) AS average FROM Transactions WHERE ${conditions.join(" AND ")}`)
-            .get(...params)
-        const { max } = db
-            .prepare(`SELECT MAX(amount) AS max FROM Transactions WHERE ${conditions.join(" AND ")}`)
-            .get(...params)
 
         return res.status(200).json({
             month: month ?? null,
@@ -282,10 +277,11 @@ app.get("/summary", (req, res) => {
             max,
         });
     } catch (err) {
-        return res.status(400).json({ error: err.issues ?? err.message })
+        return res.status(400).json({ error: "Something went wrong while fetching the summary" });
     }
 })
 
+// returns a list of category names with corresponding count in descending order
 app.get("/commoncategory", (req, res) => {
     const { date } = req.query;
 
