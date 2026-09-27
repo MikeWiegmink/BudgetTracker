@@ -1,4 +1,3 @@
-// lib/api.js
 const API_URL = "http://localhost:8080";
 
 export async function getTransactions(params = {}) {
@@ -23,4 +22,14 @@ export async function getCategories() {
     }
 
     return res.json()
+}
+
+export async function getCategoryById(id) {
+  const res = await fetch(`${API_URL}/categories/${id}`);
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch category (status ${res.status})`);
+  }
+
+  return res.json();
 }
