@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import db from './db.js';
+import { fileURLToPath } from 'url';
 import { categorySchema, transactionSchema } from './schema.js'
 
 const app = express();
@@ -15,11 +16,11 @@ app.get("/", (req, res) => {
     res.json({ status: "Hey, its home!" });
 })
 
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const PORT = 8080;
-  app.listen(PORT, () => {
-    console.log(`Its alive on http://localhost:${PORT}`);
-  });
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+    const PORT = 8080;
+    app.listen(PORT, () => {
+        console.log(`Its alive on http://localhost:${PORT}`);
+    });
 }
 
 // Categories
