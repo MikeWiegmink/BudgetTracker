@@ -1,8 +1,10 @@
 import express from 'express';
+import cors from 'cors';
 import db from './db.js';
 import { categorySchema, transactionSchema } from './schema.js'
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 app.get("/health", (req, res) => {
@@ -53,9 +55,8 @@ app.post("/categories", (req, res) => {
     }
 })
 
-app.delete("/categories", (req, res) => {
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: "No id provided" });
+app.delete("/categories/:id", (req, res) => {
+    const { id } = req.params;
 
     try {
         const info = db.prepare("DELETE FROM Categories WHERE id = ?").run(id);
@@ -64,45 +65,34 @@ app.delete("/categories", (req, res) => {
         }
         res.status(404).json({ error: "Category does not exist" });
     } catch (err) {
-        res.status(400).json({ error: err.issues ?? err.message });
+        res.status(500).json({ error: "Something went wrong while deleting the category" });
     }
 })
 
-app.put("/categories", (req, res) => {
-    const { id, name, newName } = req.query;
+app.put("/categories/:id", (req, res) => {
+    const { id } = req.params;
 
-    if (!id || !name || !newName) {
-        return res.status(400).json({ error: "missing parameters" })
-    }
+    const getCategory = (id) => db.prepare("SELECT * FROM Categories WHERE id = ?").get(id);
 
-    const categoryExists = (id, name) => {
-        const row = db.prepare("SELECT id FROM Categories WHERE id = ? AND name = ?").get(id, name);
-        return row ? true : false;
-    }
-
-    const newNameAvailable = (newName) => {
-        const row = db.prepare("SELECT * FROM Categories WHERE name = ?").get(newName);
+    const newNameAvailable = (newName, id) => {
+        const row = db.prepare("SELECT * FROM Categories WHERE name = ? AND id != ?").get(newName, id);
         return row ? false : true;
     }
 
     try {
-        if (!categoryExists(id, name)) {
-            return res.status(404).json({ error: "Could not find correct category" });
+        if (!getCategory(id)) {
+            return res.status(404).json({ error: "Category does not exist" });
         }
 
-        const data = categorySchema.parse({ name: newName });
+        const data = categorySchema.parse(req.body);
 
-        if (!newNameAvailable(data.name)) {
+        if (!newNameAvailable(data.name, id)) {
             return res.status(409).json({ error: "Name is already taken" });
         }
 
-        const info = db.prepare("UPDATE Categories SET name = ? WHERE id = ?").run(data.name, id);
+        db.prepare("UPDATE Categories SET name = ? WHERE id = ?").run(data.name, id);
 
-        if (info.changes) {
-            return res.status(200).json({ succes: info.changes})
-        }
-
-        return res.status(400).json({ error:"Unable to update row" })
+        return res.status(200).json(getCategory(id));
     } catch (err) {
         res.status(400).json({ error: err.issues ?? err.message });
     }
@@ -121,21 +111,28 @@ app.get("/transactions", (req, res) => {
     }
 
     if (category_id) {
+        const parsedCategoryId = Number(category_id);
+        if (!Number.isInteger(parsedCategoryId)) {
+            return res.status(400).json({ error: "category_id must be an integer" });
+        }
         conditions.push("category_id = ?");
-        params.push(category_id);
+        params.push(parsedCategoryId);
     }
 
     const query = conditions.length
         ? `SELECT * FROM Transactions WHERE ${conditions.join(" AND ")}`
         : "SELECT * FROM Transactions";
 
-    const stmt = db.prepare(query);
-    res.json(stmt.all(...params));
+    try {
+        const stmt = db.prepare(query);
+        res.status(200).json(stmt.all(...params));
+    } catch (err) {
+        res.status(500).json({ error: "Something went wrong while fetching transactions" });
+    }
 })
 
 app.get("/transactions/:id", (req, res) => {
     const { id } = req.params;
-    if (!id) return res.status(400).json({ error: "No id provided" });
 
     try {
         const row = db.prepare("SELECT * FROM Transactions WHERE id = ?").get(id);
@@ -144,7 +141,7 @@ app.get("/transactions/:id", (req, res) => {
         }
         return res.status(200).json(row)
     } catch (err) {
-        res.status(400).json({ error: err.issues ?? err.message })
+        res.status(500).json({ error: "Something went wrong while fetching the transaction" });
     }
 })
 
@@ -170,35 +167,24 @@ app.post("/transactions", (req, res) => {
     }
 })
 
-app.delete("/transactions", (req, res) => {
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: "No id provided" });
+app.delete("/transactions/:id", (req, res) => {
+    const { id } = req.params;
 
     try {
         const info = db.prepare("DELETE FROM Transactions WHERE id = ?").run(id);
         if (info.changes) {
             return res.status(204).end()
         }
-        res.status(404).json({ error: "Transaction does not exist "})
+        res.status(404).json({ error: "Transaction does not exist" });
     } catch (err) {
-        res.status(400).json({ error: err.issues ?? err.message })
+        res.status(500).json({ error: "Something went wrong while deleting the transaction" });
     }
 })
 
-app.put("/transactions", (req, res) => {
-    const { id, amount, desc, date, category_id} = req.query;
-    if (!id || !amount || !desc || !date || !category_id ) {
-        return res.status(400).json({ error: "Missing parameters" });
-    }
+app.put("/transactions/:id", (req, res) => {
+    const { id } = req.params;
 
-    const getTransaction = (id) => {
-        return db.prepare("SELECT * FROM Transactions WHERE id = ?").get(id);
-    }
-
-    const transactionExists = (id) => {
-        const row = getTransaction(id);
-        return row ? true : false
-    }
+    const getTransaction = (id) => db.prepare("SELECT * FROM Transactions WHERE id = ?").get(id);
 
     const categoryExists = (id) => {
         const row = db.prepare("SELECT * FROM Categories WHERE id = ?").get(id);
@@ -206,21 +192,19 @@ app.put("/transactions", (req, res) => {
     }
 
     try {
-        if (!transactionExists(id)) {
+        if (!getTransaction(id)) {
             return res.status(404).json({ error: "Transaction does not exist" });
         }
-        const data = transactionSchema.parse({ amount: Number(amount), desc: desc, date: date, category_id: Number(category_id) });
+
+        const data = transactionSchema.parse(req.body);
 
         if (!categoryExists(data.category_id)) {
             return res.status(400).json({ error: `Category ${data.category_id} does not exist.`})
         }
 
-        const info = db.prepare("UPDATE Transactions SET amount = ?, desc = ?, date = ?, category_id = ? WHERE id = ?").run(data.amount, data.desc, data.date, data.category_id, id)
-        if (info.changes) {
-            return res.status(200).json({ info: info.changes })
-        }
+        db.prepare("UPDATE Transactions SET amount = ?, desc = ?, date = ?, category_id = ? WHERE id = ?").run(data.amount, data.desc, data.date, data.category_id, id)
 
-        return res.status(400).json({ error: "Unable to update row" })
+        return res.status(200).json(getTransaction(id));
     } catch (err) {
         res.status(400).json({ error: err.issues ?? err.message });
     }
@@ -277,7 +261,7 @@ app.get("/summary", (req, res) => {
             max,
         });
     } catch (err) {
-        return res.status(400).json({ error: "Something went wrong while fetching the summary" });
+        return res.status(500).json({ error: "Something went wrong while fetching the summary" });
     }
 })
 
@@ -286,7 +270,7 @@ app.get("/commoncategory", (req, res) => {
     const { date } = req.query;
 
     if (!date) {
-        return res.status(400).json({ error: "No parameters provided"})
+        return res.status(400).json({ error: "No parameters provided" });
     }
 
     const match = date.match(/^(\d{4}-\d{2})(-\d{2})?$/);
@@ -299,9 +283,14 @@ app.get("/commoncategory", (req, res) => {
         const categories = db
             .prepare("SELECT C.name, COUNT(*) AS count FROM Transactions T JOIN Categories C ON T.category_id = C.id WHERE date LIKE ? GROUP BY T.category_id ORDER BY count DESC")
             .all(`${month}%`);
-        return res.status(200).json({ month, categories })
+
+        if (categories.length === 0) {
+            return res.status(404).json({ error: "No transactions found in that month" });
+        }
+
+        return res.status(200).json({ month, categories });
     } catch (err) {
-        return res.status(400).json({ error: err.issues ?? err.message })
+        return res.status(500).json({ error: "Something went wrong while fetching the categories" });
     }
 })
 

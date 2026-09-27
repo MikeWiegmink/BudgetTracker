@@ -127,10 +127,10 @@ test("POST /categories rejects duplicate", async () => {
     }
 });
 
-test("DELETE /categories returns correct status on valid request", async () => {
+test("DELETE /categories/:id returns correct status on valid request", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/categories?id=6`, {
+        const res = await fetch(`${baseUrl}/categories/6`, {
             method: "DELETE",
         });
 
@@ -140,29 +140,31 @@ test("DELETE /categories returns correct status on valid request", async () => {
     }
 })
 
-test("PUT /categories returns correct status on valid edit", async () => {
+test("PUT /categories/:id returns correct status on valid edit", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/categories?id=3&name=subscriptions&newName=car`, {
-        method: "PUT",
+        const res = await fetch(`${baseUrl}/categories/3`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "car" }),
         });
         const body = await res.json();
 
         assert.equal(res.status, 200);
+        assert.deepEqual(body, { id: 3, name: "car" });
     } finally {
         await close();
     }
 });
 
-test("PUT /categories returns correct status on (invalid) taken name", async () => {
+test("PUT /categories/:id returns correct status on (invalid) taken name", async () => {
   const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(
-        `${baseUrl}/categories?id=2&name=savings&newName=groceries`,
-        {
+        const res = await fetch(`${baseUrl}/categories/2`, {
             method: "PUT",
-        },
-        );
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "groceries" }),
+        });
         const body = await res.json();
 
         assert.equal(res.status, 409);
@@ -185,10 +187,10 @@ test("GET /categories return correct row after PUT", async () => {
     }
 })
 
-test("DELETE /categories returns correct status on invalid request", async () => {
+test("DELETE /categories/:id returns correct status on invalid request", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/categories?id=6`, {
+        const res = await fetch(`${baseUrl}/categories/6`, {
             method: "DELETE",
         });
         const body = await res.json()
@@ -200,46 +202,34 @@ test("DELETE /categories returns correct status on invalid request", async () =>
     }
 });
 
-test("DELETE /categories rejects request with no id", async () => {
+test("PUT /categories/:id rejects request with missing name in body", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/categories`, {
-            method: "DELETE",
+        const res = await fetch(`${baseUrl}/categories/1`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
         });
         const body = await res.json();
 
         assert.equal(res.status, 400);
-        assert.deepEqual(body, { error: "No id provided" });
     } finally {
         await close();
     }
 });
 
-test("PUT /categories rejects request with missing parameters", async () => {
+test("PUT /categories/:id returns 404 when category does not exist", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/categories?id=1&name=groceries`, {
+        const res = await fetch(`${baseUrl}/categories/999`, {
             method: "PUT",
-        });
-        const body = await res.json();
-
-        assert.equal(res.status, 400);
-        assert.deepEqual(body, { error: "missing parameters" });
-    } finally {
-        await close();
-    }
-});
-
-test("PUT /categories returns 404 when id and name do not match", async () => {
-    const { baseUrl, close } = await startTestServer();
-    try {
-        const res = await fetch(`${baseUrl}/categories?id=1&name=wrongname&newName=whatever`, {
-            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: "whatever" }),
         });
         const body = await res.json();
 
         assert.equal(res.status, 404);
-        assert.deepEqual(body, { error: "Could not find correct category" });
+        assert.deepEqual(body, { error: "Category does not exist" });
     } finally {
         await close();
     }

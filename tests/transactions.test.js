@@ -192,10 +192,10 @@ test("POST /transactions rejects non-existent category_id", async () => {
     }
 });
 
-test("DELETE /transactions returns correct status on valid request", async () => {
+test("DELETE /transactions/:id returns correct status on valid request", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions?id=3`, {
+        const res = await fetch(`${baseUrl}/transactions/3`, {
             method: "DELETE",
         });
 
@@ -205,7 +205,7 @@ test("DELETE /transactions returns correct status on valid request", async () =>
     }
 })
 
-test("DELETE /transactions actually removes the row", async () => {
+test("DELETE /transactions/:id actually removes the row", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
         const createRes = await fetch(`${baseUrl}/transactions`, {
@@ -218,7 +218,7 @@ test("DELETE /transactions actually removes the row", async () => {
         const before = await (await fetch(`${baseUrl}/transactions`)).json();
         assert.ok(before.some((t) => t.id === id));
 
-        const delRes = await fetch(`${baseUrl}/transactions?id=${id}`, { method: "DELETE" });
+        const delRes = await fetch(`${baseUrl}/transactions/${id}`, { method: "DELETE" });
         assert.equal(delRes.status, 204);
 
         const after = await (await fetch(`${baseUrl}/transactions`)).json();
@@ -229,59 +229,48 @@ test("DELETE /transactions actually removes the row", async () => {
     }
 });
 
-test("DELETE /transactions returns correct status on invalid request", async () => {
+test("DELETE /transactions/:id returns correct status on invalid request", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions?id=999`, {
+        const res = await fetch(`${baseUrl}/transactions/999`, {
         method: "DELETE",
         });
 
         const body = await res.json()
 
         assert.equal(res.status, 404);
-        assert.deepEqual(body, { error: "Transaction does not exist " });
+        assert.deepEqual(body, { error: "Transaction does not exist" });
     } finally {
         await close();
     }
 });
 
-test("DELETE /transactions returns correct status on missing parameter", async () => {
+test("PUT /transactions/:id rejects missing fields in body", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions`, {
-        method: "DELETE",
-        });
-
-        const body = await res.json();
-
-        assert.equal(res.status, 400);
-        assert.deepEqual(body, { error: "No id provided" });
-    } finally {
-        await close();
-    }
-});
-
-test("PUT /transactions returns correct after missing parameter", async () => {
-    const { baseUrl, close } = await startTestServer();
-    try {
-        const res = await fetch(`${baseUrl}/transactions`, {
+        const res = await fetch(`${baseUrl}/transactions/1`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({}),
         });
 
         const body = await res.json();
 
         assert.equal(res.status, 400);
-        assert.deepEqual(body, { error: "Missing parameters" });
+        assert.ok(Array.isArray(body.error));
+        assert.ok(body.error.length > 0);
     } finally {
         await close();
     }
 })
 
-test("PUT /transactions returns correct after invalid transaction", async () => {
+test("PUT /transactions/:id returns correct after invalid transaction", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions?id=999&amount=900&desc=house&date=1990/03/1&category_id=2`, {
+        const res = await fetch(`${baseUrl}/transactions/999`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 900, desc: "house", date: "1990-03-01", category_id: 2 }),
         });
 
         const body = await res.json();
@@ -293,38 +282,33 @@ test("PUT /transactions returns correct after invalid transaction", async () => 
     }
 });
 
-test("PUT /transactions returns correct after valid transaction", async () => {
+test("PUT /transactions/:id returns correct after valid transaction", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions?id=1&amount=900&desc=house&date=1990-03-01&category_id=2`, {
+        const res = await fetch(`${baseUrl}/transactions/1`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 900, desc: "house", date: "1990-03-01", category_id: 2 }),
         });
 
         const body = await res.json();
 
         assert.equal(res.status, 200);
-
-        const getRes = await fetch(`${baseUrl}/transactions?category_id=2`);
-        const rows = await getRes.json();
-        const updated = rows.find((t) => t.id === 1);
-
-        assert.ok(updated);
-        assert.equal(updated.amount, 900);
-        assert.equal(updated.desc, "house");
-        assert.equal(updated.date, "1990-03-01");
-        assert.equal(updated.category_id, 2);
+        assert.deepEqual(body, { id: 1, amount: 900, desc: "house", date: "1990-03-01", category_id: 2 });
     } finally {
         await close();
     }
 });
 
-test("PUT /transactions rejects invalid field types", async () => {
+test("PUT /transactions/:id rejects invalid field types", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const before = await (await fetch(`${baseUrl}/transactions?category_id=2`)).json();
+        const before = await (await fetch(`${baseUrl}/transactions/1`)).json();
 
-        const res = await fetch(`${baseUrl}/transactions?id=1&amount=abc&desc=house&date=1990-03-01&category_id=2`, {
+        const res = await fetch(`${baseUrl}/transactions/1`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: "abc", desc: "house", date: "1990-03-01", category_id: 2 }),
         });
         const body = await res.json();
 
@@ -333,18 +317,20 @@ test("PUT /transactions rejects invalid field types", async () => {
         assert.ok(body.error.length > 0);
         assert.ok(body.error.some((issue) => issue.path.includes("amount")));
 
-        const after = await (await fetch(`${baseUrl}/transactions?category_id=2`)).json();
+        const after = await (await fetch(`${baseUrl}/transactions/1`)).json();
         assert.deepEqual(after, before);
     } finally {
         await close();
     }
 });
 
-test("PUT /transactions rejects non-integer amount", async () => {
+test("PUT /transactions/:id rejects non-integer amount", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions?id=1&amount=1.5&desc=house&date=1990-03-01&category_id=2`, {
+        const res = await fetch(`${baseUrl}/transactions/1`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 1.5, desc: "house", date: "1990-03-01", category_id: 2 }),
         });
         const body = await res.json();
 
@@ -355,11 +341,13 @@ test("PUT /transactions rejects non-integer amount", async () => {
     }
 });
 
-test("PUT /transactions rejects non-existent category_id", async () => {
+test("PUT /transactions/:id rejects non-existent category_id", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions?id=1&amount=900&desc=house&date=1990-03-01&category_id=999`, {
+        const res = await fetch(`${baseUrl}/transactions/1`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 900, desc: "house", date: "1990-03-01", category_id: 999 }),
         });
         const body = await res.json();
 
@@ -441,11 +429,13 @@ test("POST /transactions accepts a negative amount", async () => {
     }
 });
 
-test("PUT /transactions accepts amount=0", async () => {
+test("PUT /transactions/:id accepts amount=0", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
-        const res = await fetch(`${baseUrl}/transactions?id=2&amount=0&desc=free&date=2026-09-18&category_id=3`, {
+        const res = await fetch(`${baseUrl}/transactions/2`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 0, desc: "free", date: "2026-09-18", category_id: 3 }),
         });
         assert.equal(res.status, 200);
 
@@ -457,13 +447,15 @@ test("PUT /transactions accepts amount=0", async () => {
     }
 });
 
-test("PUT /transactions rejects empty desc", async () => {
+test("PUT /transactions/:id rejects empty desc", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
         const before = await (await fetch(`${baseUrl}/transactions/1`)).json();
 
-        const res = await fetch(`${baseUrl}/transactions?id=1&amount=900&desc=&date=1990-03-01&category_id=2`, {
+        const res = await fetch(`${baseUrl}/transactions/1`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 900, desc: "", date: "1990-03-01", category_id: 2 }),
         });
         assert.equal(res.status, 400);
 
@@ -474,13 +466,15 @@ test("PUT /transactions rejects empty desc", async () => {
     }
 });
 
-test("PUT /transactions rejects invalid date", async () => {
+test("PUT /transactions/:id rejects invalid date", async () => {
     const { baseUrl, close } = await startTestServer();
     try {
         const before = await (await fetch(`${baseUrl}/transactions/1`)).json();
 
-        const res = await fetch(`${baseUrl}/transactions?id=1&amount=900&desc=house&date=not-a-date&category_id=2`, {
+        const res = await fetch(`${baseUrl}/transactions/1`, {
             method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ amount: 900, desc: "house", date: "not-a-date", category_id: 2 }),
         });
         const body = await res.json();
 
