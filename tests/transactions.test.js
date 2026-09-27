@@ -10,7 +10,7 @@ test("GET /transactions returns all rows", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.equal(body.length, 11);
+        assert.equal(body.length, 131);
     } finally {
         await close();
     }
@@ -50,7 +50,7 @@ test("GET /transactions filters by category_id", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.equal(body.length, 3);
+        assert.equal(body.length, 25);
         assert.ok(body.every((t) => t.category_id === 3));
     } finally {
         await close();
@@ -65,7 +65,7 @@ test("GET /transactions filters by date", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.equal(body.length, 5);
+        assert.equal(body.length, 27);
         assert.ok(body.every((t) => t.date.includes("2026-09")));
     } finally {
         await close();
@@ -80,7 +80,7 @@ test("GET /transactions filters by date and category_id combined", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.equal(body.length, 3);
+        assert.equal(body.length, 9);
         assert.ok(body.every((t) => t.category_id === 3 && t.date.includes("2026-09")));
     } finally {
         await close();

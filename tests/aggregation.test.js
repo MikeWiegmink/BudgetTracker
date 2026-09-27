@@ -52,7 +52,7 @@ test("GET /summary returns correct only date", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.deepEqual(body, {month: "2026-09", total: 305, average: 61, max: 100 })
+        assert.deepEqual(body, { month: "2026-09", total: 1293, average: 1293 / 27, max: 219 })
     } finally {
         await close()
     }
@@ -66,7 +66,7 @@ test("GET /summary returns correct only category_id", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.deepEqual(body, { total: 120, average: 40, max: 60 })
+        assert.deepEqual(body, { total: 776, average: 776 / 20, max: 68 })
     } finally {
         await close()
     }
@@ -80,9 +80,81 @@ test("GET /summary returns correct date & category_id", async () => {
         const body = await res.json();
 
         assert.equal(res.status, 200);
-        assert.deepEqual(body, { month: "2026-08", total: 60, average: 30, max: 40 })
+        assert.deepEqual(body, { month: "2026-08", total: 105, average: 105 / 4, max: 40 })
     } finally {
         await close()
     }
 })
 
+test("GET /commoncategory missing parameter", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/commoncategory`);
+        const body = await res.json();
+
+        assert.equal(res.status, 400);
+        assert.deepEqual(body, { error: "No parameters provided"});
+    } finally {
+        await close();
+    }
+})
+
+test("GET /commoncategory wrong parameter", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/commoncategory?date=29-09-2026`);
+        const body = await res.json();
+        
+        assert.equal(res.status, 400);
+        assert.deepEqual(body, { error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" });
+    } finally {
+        await close();
+    }
+})
+
+test("GET /commoncategory returns correct 1", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/commoncategory?date=2026-06-05`)
+        const body = await res.json();
+        
+        assert.equal(res.status, 200)
+        assert.deepEqual(body, {
+            month: '2026-06',
+            categories: [
+                { name: 'savings', count: 6 },
+                { name: 'transport', count: 3 },
+                { name: 'subscriptions', count: 3 },
+                { name: 'entertainment', count: 2 },
+                { name: 'groceries', count: 2 }
+            ]
+        })
+    } finally {
+        await close();
+    }
+})
+
+test("GET /commoncategory returns correct 2", async() => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/commoncategory?date=2026-07`)
+        const body = await res.json();
+
+        assert.equal(res.status, 200)
+        assert.deepEqual(body, {
+            month: '2026-07',
+            categories: [
+                { name: 'entertainment', count: 9 },
+                { name: 'transport', count: 6 },
+                { name: 'savings', count: 6 },
+                { name: 'subscriptions', count: 3 },
+                { name: 'groceries', count: 2 }
+            ]
+        })
+    } finally {
+        await close()
+    }
+})

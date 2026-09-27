@@ -281,4 +281,27 @@ app.get("/summary", (req, res) => {
     }
 })
 
+app.get("/commoncategory", (req, res) => {
+    const { date } = req.query;
+
+    if (!date) {
+        return res.status(400).json({ error: "No parameters provided"})
+    }
+
+    const match = date.match(/^(\d{4}-\d{2})(-\d{2})?$/);
+    if (!match) {
+        return res.status(400).json({ error: "Invalid date format, expected YYYY-MM or YYYY-MM-DD" });
+    }
+    const month = match[1];
+
+    try {
+        const categories = db
+            .prepare("SELECT C.name, COUNT(*) AS count FROM Transactions T JOIN Categories C ON T.category_id = C.id WHERE date LIKE ? GROUP BY T.category_id ORDER BY count DESC")
+            .all(`${month}%`);
+        return res.status(200).json({ month, categories })
+    } catch (err) {
+        return res.status(400).json({ error: err.issues ?? err.message })
+    }
+})
+
 export default app;
