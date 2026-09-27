@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
-    "test": "node --import ./tests/setup.js --test"
+    "test": "node --import ./tests/setup.js --test tests/**/*.test.js"
   },
   "repository": {
     "type": "git",
