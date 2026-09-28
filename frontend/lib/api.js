@@ -25,11 +25,21 @@ export async function getCategories() {
 }
 
 export async function getCategoryById(id) {
-  const res = await fetch(`${API_URL}/categories/${id}`);
+    const res = await fetch(`${API_URL}/categories/${id}`);
 
-  if (!res.ok) {
-    throw new Error(`Failed to fetch category (status ${res.status})`);
-  }
+    if (!res.ok) {
+        throw new Error(`Failed to fetch category (status ${res.status})`);
+    }
 
-  return res.json();
+    return res.json();
+}
+
+export async function deleteTransactionById(id) {
+    const res = await fetch(`${API_URL}/transactions/${id}`, {
+        method: "DELETE",
+    });
+
+    if (!res.ok) {
+        throw new Error(`Failed to delete transaction (status ${res.status})`);
+    }
 }

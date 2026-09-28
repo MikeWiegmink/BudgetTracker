@@ -1,5 +1,6 @@
 import PageContainer from "@/components/pageContainer";
 import "@/styles/index.css";
+import TransactionItem from "@/components/transactionItem";
 import { getTransactions, getCategories } from "@/lib/api"
 
 export default async function Home() {
@@ -10,14 +11,7 @@ export default async function Home() {
         return (
             <div className="transactionListContainer">
                 {transactions.map((t : any) => {
-                    return (
-                        <div key={t.id} className="transactionItemContainer">
-                            <p>{t.desc}</p>
-                            <p>{t.date}</p>
-                            <p>{t.amount}</p>
-                            <p>{t.category_id}</p>
-                        </div>
-                    )
+                    return <TransactionItem key={t.id} transaction={t} />
                 })}
             </div>
         )
