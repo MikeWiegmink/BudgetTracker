@@ -43,3 +43,17 @@ export async function deleteTransactionById(id) {
         throw new Error(`Failed to delete transaction (status ${res.status})`);
     }
 }
+
+export async function editTransactionById(id, desc, amount, date, category_id) {
+    const res = await fetch(`${API_URL}/transactions/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ desc, amount, date, category_id }),
+    });
+
+    if (!res.ok) {
+        throw new Error(`Failed to edit transaction (status ${res.status})`);
+    }
+
+    return res.json();
+}
