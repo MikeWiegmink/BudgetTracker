@@ -1,17 +1,22 @@
 .page-container-wrapper {
+    --bg: #f6f6f4;
+    --surface: #ffffff;
+    --border: #d9d9d4;
+    --text: #222222;
+    --text-muted: #6a6a66;
+    --accent: #2f5d8a;
+
     flex: 1;
-    padding: clamp(1rem, 5vw, 4rem) 10%;
-    background-image: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 50%, #fce7f3 100%);
+    padding: 2rem 1.5rem;
+    background-color: var(--bg);
+    color: var(--text);
 }
 
 .page-container {
-    padding: 2.5rem;
-    border-radius: 1.5rem;
-    color: #1f2937;
-    background-image: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #f9a8d4 100%);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow:
-        0 20px 40px -10px rgba(99, 102, 241, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 64rem;
+    margin: 0 auto;
+    color: var(--text);
 }
-
