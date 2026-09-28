@@ -1,0 +1,101 @@
+.headerContainer {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+.headerContainer h1 {
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+}
+.headerContainer p {
+    margin-top: 0.25rem;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.contentContainer {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    align-items: start;
+    gap: 1.5rem;
+}
+.transactionContainer,
+.categoryContainer {
+    min-height: 5rem;
+    padding: 1rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+.headerText {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.transactionListContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.categoryItemContainer {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+.categoryItemContainer:last-child {
+    border-bottom: none;
+}
+
+.transactionItemContainer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 0.35rem 1rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+.transactionItemContainer p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.transactionItemContainer p:nth-child(1) {
+    grid-column: 1;
+    grid-row: 1;
+    font-weight: 600;
+}
+.transactionItemContainer p:nth-child(3) {
+    grid-column: 2;
+    grid-row: 1;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+.transactionItemContainer p:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+.transactionItemContainer p:nth-child(4) {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 0.8rem;
+    text-align: right;
+    color: var(--text-muted);
+}

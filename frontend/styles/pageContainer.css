@@ -1,0 +1,22 @@
+.page-container-wrapper {
+    --bg: #f6f6f4;
+    --surface: #ffffff;
+    --border: #d9d9d4;
+    --text: #222222;
+    --text-muted: #6a6a66;
+    --accent: #2f5d8a;
+
+    flex: 1;
+    padding: 2rem 1.5rem;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 64rem;
+    margin: 0 auto;
+    color: var(--text);
+}
