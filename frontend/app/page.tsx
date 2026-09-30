@@ -1,6 +1,7 @@
 import PageContainer from "@/components/pageContainer";
 import "@/styles/index.css";
-import TransactionItem from "@/components/transactionItem";
+import { TransactionItem, TransactionHeader } from "@/components/transactionItem";
+import { CategoryItem, CategoryHeader } from "@/components/categoryItem";
 import { getTransactions, getCategories } from "@/lib/api"
 
 export default async function Home() {
@@ -23,22 +24,10 @@ export default async function Home() {
         return(
             <div className="categoryListContainer">
                 {categories.map((c : any) => {
-                    return (
-                        <div key={c.id} className="categoryItemContainer">
-                            <p>{c.name}</p>
-                        </div>
-                    )
+                    return (<CategoryItem key={c.id} category={c} />)
                 })}
             </div>
         )
-    }
-
-    const handleAddTransaction = () => {
-        console.log("Add Transaction button clicked");
-    }
-
-    const handleAddCategory = () => {
-        console.log("Add Category button clicked");
     }
 
     return (
@@ -49,21 +38,11 @@ export default async function Home() {
             </div>
             <div className="contentContainer">
                 <div className="transactionContainer">
-                    <div className="transactionHeaderContainer">
-                        <h1 className="headerText">Transactions</h1>
-                        <button className="addTransactionButton">
-                            + Add
-                        </button>
-                    </div>
+                    <TransactionHeader />
                     {getTransactionList()}
                 </div>
                 <div className="categoryContainer">
-                    <div className="categoryHeaderContainer">
-                        <h1 className="headerText">Categories</h1>
-                        <button className="addCategoryButton">
-                            + Add
-                        </button>
-                    </div>
+                    <CategoryHeader />
                     {getCategoryList()}
                 </div>
             </div>

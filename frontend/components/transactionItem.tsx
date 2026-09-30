@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { deleteTransactionById } from "@/lib/api";
 
-export default function TransactionItem({ transaction }: { transaction: any }) {
+export function TransactionItem({ transaction }: { transaction: any }) {
     const router = useRouter();
 
     const handleEditTransaction = async (id: number) => {
@@ -32,9 +32,22 @@ export default function TransactionItem({ transaction }: { transaction: any }) {
                 </div>
             </div>
             <div className="transactionButtonContainer">
-                <button onClick={() => handleEditTransaction(transaction.id)}>Edit</button>
-                <button onClick={() => handleDeleteTransaction(transaction.id)}>Delete</button>
+                <button className="editButton" onClick={() => handleEditTransaction(transaction.id)}>Edit</button>
+                <button className="deleteButton" onClick={() => handleDeleteTransaction(transaction.id)}>Delete</button>
             </div>
+        </div>
+    );
+}
+
+export function TransactionHeader() {
+    const handleAddTransaction = () => {
+        console.log("Add Transaction button clicked");
+    }
+
+    return (
+        <div className="transactionHeaderContainer">
+            <h1 className="headerText">Transactions</h1>
+            <button className="addTransactionButton" onClick={() => handleAddTransaction()}>+ Add</button>
         </div>
     );
 }
