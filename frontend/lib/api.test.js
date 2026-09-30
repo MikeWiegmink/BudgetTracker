@@ -5,7 +5,7 @@ import {
     getCategoryById,
     addTransaction,
     deleteTransactionById,
-    editTransactionById,
+    editTransaction,
 } from "./api";
 
 function mockFetchOnce({ ok = true, status = 200, body = {} } = {}) {
@@ -150,12 +150,12 @@ describe("api.js", () => {
         });
     });
 
-    describe("editTransactionById", () => {
+    describe("editTransaction", () => {
         it("PUTs the updated fields as json and returns the updated transaction", async () => {
             const updated = { id: 3, desc: "Lunch", amount: 12, date: "2026-09-29", category_id: 1 };
             mockFetchOnce({ body: updated });
 
-            const result = await editTransactionById(3, "Lunch", 12, "2026-09-29", 1);
+            const result = await editTransaction(3, "Lunch", 12, "2026-09-29", 1);
 
             expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/transactions/3", {
                 method: "PUT",
@@ -174,7 +174,7 @@ describe("api.js", () => {
             mockFetchOnce({ ok: false, status: 500 });
 
             await expect(
-                editTransactionById(3, "Lunch", 12, "2026-09-29", 1)
+                editTransaction(3, "Lunch", 12, "2026-09-29", 1)
             ).rejects.toThrow("Failed to edit transaction (status 500)");
         });
     });

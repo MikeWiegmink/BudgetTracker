@@ -58,7 +58,7 @@ export async function deleteTransactionById(id) {
     }
 }
 
-export async function editTransactionById(id, desc, amount, date, category_id) {
+export async function editTransaction(id, desc, amount, date, category_id) {
     const res = await fetch(`${API_URL}/transactions/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

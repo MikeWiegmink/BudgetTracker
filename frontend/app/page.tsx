@@ -13,7 +13,7 @@ export default async function Home() {
         return (
             <div className="transactionListContainer">
                 {transactions.map((t : any) => {
-                    return <TransactionItem key={t.id} transaction={t} />
+                    return <TransactionItem key={t.id} transaction={t} categories={categoryOptions} />
                 })}
             </div>
         )
