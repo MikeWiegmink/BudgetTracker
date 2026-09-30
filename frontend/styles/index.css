@@ -204,6 +204,11 @@ button.deleteButton {
 .modalError {
     color: crimson;
 }
+.categoryItemContainer > .modalError {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.9rem;
+}
 .modalCancelButton,
 .modalConfirmButton {
     padding: 0.5rem 1rem;

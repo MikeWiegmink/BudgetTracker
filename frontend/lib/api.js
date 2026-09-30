@@ -71,3 +71,42 @@ export async function editTransaction(id, desc, amount, date, category_id) {
 
     return res.json();
 }
+
+export async function addCategory(name) {
+    const res = await fetch(`${API_URL}/categories`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+    })
+
+    if (!res.ok) {
+        throw new Error(`Failed to add category (status ${res.status})`);
+    }
+
+    return res.json()
+}
+
+export async function editCategory(id, name) {
+    const res = await fetch(`${API_URL}/categories/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+    });
+
+    if (!res.ok) {
+        throw new Error(`Failed to edit category (status ${res.status})`)
+    }
+
+    return res.json()
+}
+
+export async function deleteCategoryById(id) {
+    const res = await fetch(`${API_URL}/categories/${id}`, {
+        method: "DELETE"
+    })
+
+    if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error ?? `Failed to delete category (status ${res.status})`)
+    }
+}

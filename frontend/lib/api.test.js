@@ -6,6 +6,7 @@ import {
     addTransaction,
     deleteTransactionById,
     editTransaction,
+    deleteCategoryById,
 } from "./api";
 
 function mockFetchOnce({ ok = true, status = 200, body = {} } = {}) {
@@ -146,6 +147,42 @@ describe("api.js", () => {
 
             await expect(deleteTransactionById(999)).rejects.toThrow(
                 "Failed to delete transaction (status 404)"
+            );
+        });
+    });
+
+    describe("deleteCategoryById", () => {
+        it("sends a DELETE request for the given id", async () => {
+            mockFetchOnce({ status: 204 });
+
+            await deleteCategoryById(3);
+
+            expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/categories/3", {
+                method: "DELETE",
+            });
+        });
+
+        it("throws the server's error message when the category is in use", async () => {
+            mockFetchOnce({
+                ok: false,
+                status: 409,
+                body: { error: "Category is used by existing transactions" },
+            });
+
+            await expect(deleteCategoryById(1)).rejects.toThrow(
+                "Category is used by existing transactions"
+            );
+        });
+
+        it("falls back to the status code when the response has no error body", async () => {
+            global.fetch = vi.fn().mockResolvedValue({
+                ok: false,
+                status: 500,
+                json: vi.fn().mockRejectedValue(new Error("no body")),
+            });
+
+            await expect(deleteCategoryById(1)).rejects.toThrow(
+                "Failed to delete category (status 500)"
             );
         });
     });
