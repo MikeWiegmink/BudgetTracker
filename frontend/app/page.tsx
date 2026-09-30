@@ -19,7 +19,7 @@ export default async function Home() {
 
     const getCategoryList = async () => {
         const categories = await getCategories();
-            
+
         return(
             <div className="categoryListContainer">
                 {categories.map((c : any) => {
@@ -33,6 +33,14 @@ export default async function Home() {
         )
     }
 
+    const handleAddTransaction = () => {
+        console.log("Add Transaction button clicked");
+    }
+
+    const handleAddCategory = () => {
+        console.log("Add Category button clicked");
+    }
+
     return (
         <PageContainer>
             <div className="headerContainer">
@@ -41,11 +49,21 @@ export default async function Home() {
             </div>
             <div className="contentContainer">
                 <div className="transactionContainer">
-                    <h1 className="headerText">Transactions</h1>
+                    <div className="transactionHeaderContainer">
+                        <h1 className="headerText">Transactions</h1>
+                        <button className="addTransactionButton">
+                            + Add
+                        </button>
+                    </div>
                     {getTransactionList()}
                 </div>
                 <div className="categoryContainer">
-                    <h1 className="headerText">Categories</h1>
+                    <div className="categoryHeaderContainer">
+                        <h1 className="headerText">Categories</h1>
+                        <button className="addCategoryButton">
+                            + Add
+                        </button>
+                    </div>
                     {getCategoryList()}
                 </div>
             </div>
