@@ -154,3 +154,53 @@ button:hover {
 button.deleteButton {
     color: red;
 }
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}
+.modalContent {
+    width: 24rem;
+    max-width: 90vw;
+    padding: 1.5rem;
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    background-color: white;
+    color: black;
+}
+.modalTitle {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+.modalForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.modalForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-weight: 600;
+}
+.modalForm input,
+.modalForm select {
+    padding: 0.4rem;
+    border: 1px solid black;
+    border-radius: 0.25rem;
+    font-weight: 400;
+}
+.modalButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+.modalError {
+    color: crimson;
+}

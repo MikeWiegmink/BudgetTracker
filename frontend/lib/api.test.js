@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { getTransactions, getCategories, getCategoryById } from "./api";
+import {
+    getTransactions,
+    getCategories,
+    getCategoryById,
+    addTransaction,
+    deleteTransactionById,
+    editTransactionById,
+} from "./api";
 
 function mockFetchOnce({ ok = true, status = 200, body = {} } = {}) {
     global.fetch = vi.fn().mockResolvedValue({
@@ -82,6 +89,93 @@ describe("api.js", () => {
             await expect(getCategoryById(999)).rejects.toThrow(
                 "Failed to fetch category (status 404)"
             );
+        });
+    });
+
+    describe("addTransaction", () => {
+        it("POSTs the transaction as json and returns the created transaction", async () => {
+            const created = { id: 1, desc: "Coffee", amount: 4.5, date: "2026-09-30", category_id: 2 };
+            mockFetchOnce({ body: created });
+
+            const result = await addTransaction("Coffee", 4.5, "2026-09-30", 2);
+
+            expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/transactions", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    desc: "Coffee",
+                    amount: 4.5,
+                    date: "2026-09-30",
+                    category_id: 2,
+                }),
+            });
+            expect(result).toEqual(created);
+        });
+
+        it("throws an error with the status code when the response is not ok", async () => {
+            mockFetchOnce({ ok: false, status: 400 });
+
+            await expect(addTransaction("", 0, "", null)).rejects.toThrow(
+                "Failed to add transaction (status 400)"
+            );
+        });
+
+        it("propagates network errors", async () => {
+            global.fetch = vi.fn().mockRejectedValue(new Error("network down"));
+
+            await expect(addTransaction("Coffee", 4.5, "2026-09-30", 2)).rejects.toThrow(
+                "network down"
+            );
+        });
+    });
+
+    describe("deleteTransactionById", () => {
+        it("sends a DELETE request for the given id", async () => {
+            mockFetchOnce({ status: 204 });
+
+            const result = await deleteTransactionById(7);
+
+            expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/transactions/7", {
+                method: "DELETE",
+            });
+            expect(result).toBeUndefined();
+        });
+
+        it("throws an error with the status code when the response is not ok", async () => {
+            mockFetchOnce({ ok: false, status: 404 });
+
+            await expect(deleteTransactionById(999)).rejects.toThrow(
+                "Failed to delete transaction (status 404)"
+            );
+        });
+    });
+
+    describe("editTransactionById", () => {
+        it("PUTs the updated fields as json and returns the updated transaction", async () => {
+            const updated = { id: 3, desc: "Lunch", amount: 12, date: "2026-09-29", category_id: 1 };
+            mockFetchOnce({ body: updated });
+
+            const result = await editTransactionById(3, "Lunch", 12, "2026-09-29", 1);
+
+            expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/transactions/3", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    desc: "Lunch",
+                    amount: 12,
+                    date: "2026-09-29",
+                    category_id: 1,
+                }),
+            });
+            expect(result).toEqual(updated);
+        });
+
+        it("throws an error with the status code when the response is not ok", async () => {
+            mockFetchOnce({ ok: false, status: 500 });
+
+            await expect(
+                editTransactionById(3, "Lunch", 12, "2026-09-29", 1)
+            ).rejects.toThrow("Failed to edit transaction (status 500)");
         });
     });
 });

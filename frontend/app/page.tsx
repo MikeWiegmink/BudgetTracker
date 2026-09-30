@@ -5,6 +5,7 @@ import { CategoryItem, CategoryHeader } from "@/components/categoryItem";
 import { getTransactions, getCategories } from "@/lib/api"
 
 export default async function Home() {
+    const categoryOptions = await getCategories();
 
     const getTransactionList = async () => {
         const transactions = await getTransactions()
@@ -19,11 +20,9 @@ export default async function Home() {
     }
 
     const getCategoryList = async () => {
-        const categories = await getCategories();
-
         return(
             <div className="categoryListContainer">
-                {categories.map((c : any) => {
+                {categoryOptions.map((c : any) => {
                     return (<CategoryItem key={c.id} category={c} />)
                 })}
             </div>
@@ -38,7 +37,7 @@ export default async function Home() {
             </div>
             <div className="contentContainer">
                 <div className="transactionContainer">
-                    <TransactionHeader />
+                    <TransactionHeader categories={categoryOptions} />
                     {getTransactionList()}
                 </div>
                 <div className="categoryContainer">

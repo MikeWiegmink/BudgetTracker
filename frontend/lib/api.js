@@ -34,6 +34,20 @@ export async function getCategoryById(id) {
     return res.json();
 }
 
+export async function addTransaction(desc, amount, date, category_id) {
+    const res = await fetch(`${API_URL}/transactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ desc, amount, date, category_id }),
+    });
+
+    if (!res.ok) {
+        throw new Error(`Failed to add transaction (status ${res.status})`);
+    }
+
+    return res.json();
+}
+
 export async function deleteTransactionById(id) {
     const res = await fetch(`${API_URL}/transactions/${id}`, {
         method: "DELETE",
