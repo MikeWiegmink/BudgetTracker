@@ -140,6 +140,25 @@ test("DELETE /categories/:id returns correct status on valid request", async () 
     }
 })
 
+test("DELETE /categories/:id rejects deleting a category used by transactions", async () => {
+    const { baseUrl, close } = await startTestServer();
+    try {
+        const res = await fetch(`${baseUrl}/categories/1`, {
+            method: "DELETE",
+        });
+        const body = await res.json();
+
+        assert.equal(res.status, 409);
+        assert.deepEqual(body, { error: "Category is used by existing transactions" });
+
+        const check = await fetch(`${baseUrl}/categories`);
+        const categories = await check.json();
+        assert.ok(categories.some((c) => c.id === 1));
+    } finally {
+        await close();
+    }
+})
+
 test("PUT /categories/:id returns correct status on valid edit", async () => {
     const { baseUrl, close } = await startTestServer();
     try {

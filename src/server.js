@@ -66,6 +66,9 @@ app.delete("/categories/:id", (req, res) => {
         }
         res.status(404).json({ error: "Category does not exist" });
     } catch (err) {
+        if (err.code === "SQLITE_CONSTRAINT_FOREIGNKEY") {
+            return res.status(409).json({ error: "Category is used by existing transactions" });
+        }
         res.status(500).json({ error: "Something went wrong while deleting the category" });
     }
 })

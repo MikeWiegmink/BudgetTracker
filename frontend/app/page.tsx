@@ -1,8 +1,11 @@
 import PageContainer from "@/components/pageContainer";
 import "@/styles/index.css";
+import { TransactionItem, TransactionHeader } from "@/components/transactionItem";
+import { CategoryItem, CategoryHeader } from "@/components/categoryItem";
 import { getTransactions, getCategories } from "@/lib/api"
 
 export default async function Home() {
+    const categoryOptions = await getCategories();
 
     const getTransactionList = async () => {
         const transactions = await getTransactions()
@@ -10,30 +13,17 @@ export default async function Home() {
         return (
             <div className="transactionListContainer">
                 {transactions.map((t : any) => {
-                    return (
-                        <div key={t.id} className="transactionItemContainer">
-                            <p>{t.desc}</p>
-                            <p>{t.date}</p>
-                            <p>{t.amount}</p>
-                            <p>{t.category_id}</p>
-                        </div>
-                    )
+                    return <TransactionItem key={t.id} transaction={t} categories={categoryOptions} />
                 })}
             </div>
         )
     }
 
     const getCategoryList = async () => {
-        const categories = await getCategories();
-            
         return(
             <div className="categoryListContainer">
-                {categories.map((c : any) => {
-                    return (
-                        <div key={c.id} className="categoryItemContainer">
-                            <p>{c.name}</p>
-                        </div>
-                    )
+                {categoryOptions.map((c : any) => {
+                    return (<CategoryItem key={c.id} category={c} />)
                 })}
             </div>
         )
@@ -47,11 +37,11 @@ export default async function Home() {
             </div>
             <div className="contentContainer">
                 <div className="transactionContainer">
-                    <h1 className="headerText">Transactions</h1>
+                    <TransactionHeader categories={categoryOptions} />
                     {getTransactionList()}
                 </div>
                 <div className="categoryContainer">
-                    <h1 className="headerText">Categories</h1>
+                    <CategoryHeader />
                     {getCategoryList()}
                 </div>
             </div>

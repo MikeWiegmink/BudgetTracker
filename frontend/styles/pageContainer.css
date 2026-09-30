@@ -5,6 +5,8 @@
     --text: #222222;
     --text-muted: #6a6a66;
     --accent: #2f5d8a;
+    --addTransaction: rgb(29, 185, 84);
+    --addCategory: #ED8F03;
 
     flex: 1;
     padding: 2rem 1.5rem;

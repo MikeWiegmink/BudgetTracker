@@ -15,12 +15,23 @@
     font-size: 1rem;
     color: var(--text-muted);
 }
-
 .contentContainer {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
     align-items: start;
     gap: 1.5rem;
+}
+.transactionHeaderContainer {
+    display: grid;
+    grid-template-columns: minmax(0, 9fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem
+}
+.categoryHeaderContainer {
+    display: grid;
+    grid-template-columns: minmax(0, 7.5fr) minmax(0, 2.5fr);
+    align-items: start;
+    gap: 1.5rem
 }
 .transactionContainer,
 .categoryContainer {
@@ -39,24 +50,37 @@
     font-weight: 700;
     color: var(--text);
 }
+.addTransactionButton,
+.addCategoryButton {
+    display: block;
+    margin-left: auto;
+    padding: 0.5rem;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 800;
+    text-align: center;
+    border: 1px solid black;
+    border-radius: 2rem;
+    margin-bottom: 0.5rem;
+}
+.addTransactionButton {
+    background-color: var(--addTransaction);
+}
+.addCategoryButton {
+    background-color: var(--addCategory);
+}
+button:hover {
+    cursor: pointer;
+}
 
-.transactionListContainer {
+.transactionListContainer,
+.categoryListContainer {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
+.transactionItemContainer,
 .categoryItemContainer {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--border);
-    font-family: var(--font-geist-sans), system-ui, sans-serif;
-    font-size: 0.95rem;
-    color: var(--text);
-}
-.categoryItemContainer:last-child {
-    border-bottom: none;
-}
-
-.transactionItemContainer {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: baseline;
@@ -69,33 +93,135 @@
     font-size: 0.95rem;
     color: var(--text);
 }
-.transactionItemContainer p {
+.categoryName {
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+.transactionSubContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.transactionSubContainer p {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.transactionItemContainer p:nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
+.transactionButtonContainer,
+.categoryButtonContainer {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    padding-left: 1rem;
+}
+.transactionItemContainer,
+.categoryItemContainer {
+    align-items: center;
+    background-color: var(--surface);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.categoryName {
+    text-align: left;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+}
+.transactionButtonContainer,
+.categoryButtonContainer {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    border-left: 1px solid black;
+}
+.transactionButtonContainer button,
+.categoryButtonContainer button {
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+}
+.transactionSubContainer {
+    gap: 1rem;
+}
+.transactionSubContainer p {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+button.deleteButton {
+    color: red;
+}
+
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+}
+.modalContent {
+    width: 24rem;
+    max-width: 90vw;
+    padding: 1.5rem;
+    border: 1px solid black;
+    border-radius: 0.5rem;
+    background-color: white;
+    color: black;
+}
+.modalTitle {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+.modalForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.modalForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     font-weight: 600;
 }
-.transactionItemContainer p:nth-child(3) {
-    grid-column: 2;
-    grid-row: 1;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
+.modalForm input,
+.modalForm select {
+    padding: 0.4rem;
+    border: 1px solid black;
+    border-radius: 0.25rem;
+    font-weight: 400;
 }
-.transactionItemContainer p:nth-child(2) {
-    grid-column: 1;
-    grid-row: 2;
-    font-size: 0.8rem;
-    color: var(--text-muted);
+.modalButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
 }
-.transactionItemContainer p:nth-child(4) {
-    grid-column: 2;
-    grid-row: 2;
-    font-size: 0.8rem;
-    text-align: right;
-    color: var(--text-muted);
+.modalError {
+    color: crimson;
+}
+.categoryItemContainer > .modalError {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.9rem;
+}
+.modalCancelButton,
+.modalConfirmButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: 1px solid black;
+    border-radius: 2rem;
+}
+.modalCancelButton {
+    background-color: white;
+    color: black;
+}
+.modalConfirmButton {
+    background-color: var(--addTransaction);
+    color: white;
 }
