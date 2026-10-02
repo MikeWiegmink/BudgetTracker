@@ -1,7 +1,7 @@
 "use client";
 
 import Modal from "./modal";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import  { addCategory, editCategory, deleteCategoryById } from "@/lib/api";
 
@@ -10,6 +10,12 @@ export function CategoryItem({ category }: { category: any }) {
     const [error, setError] = useState("");
     const [deleteError, setDeleteError] = useState("");
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const isSelected = searchParams.get("category") === String(category.id);
+
+    const handleClickCategory = () => {
+        router.push(isSelected ? "/" : `/?category=${category.id}`);
+    };
 
     const handleClose = () => {
         setOpen(false);
@@ -40,7 +46,7 @@ export function CategoryItem({ category }: { category: any }) {
 
     return (
     <div className="categoryItemContainer">
-        <p className="categoryName">{category.name}</p>
+        <button onClick={handleClickCategory} className={`categoryName${isSelected ? " selected" : ""}`}>{category.name}</button>
         <div className="categoryButtonContainer">
             <button onClick={() => setOpen(true)}>Edit</button>
             <button
