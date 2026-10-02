@@ -4,11 +4,12 @@ import { TransactionItem, TransactionHeader } from "@/components/transactionItem
 import { CategoryItem, CategoryHeader } from "@/components/categoryItem";
 import { getTransactions, getCategories } from "@/lib/api"
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
+    const { category } = await searchParams;
     const categoryOptions = await getCategories();
 
     const getTransactionList = async () => {
-        const transactions = await getTransactions()
+        const transactions = await getTransactions(category ? { category_id: category } : {})
 
         return (
             <div className="transactionListContainer">
