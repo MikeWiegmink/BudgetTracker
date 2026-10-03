@@ -10,6 +10,11 @@ export function TransactionItem({ transaction, categories }: { transaction: any,
     const [open, setOpen] = useState(false);
     const [error, setError] = useState("");
 
+    const getCategoryname = (id: number) => {
+        const category = categories.filter((cat) => cat.id === id)[0]
+        return category.name
+    }
+
     const handleDeleteTransaction = async (id: number) => {
         try {
             await deleteTransactionById(id);
@@ -53,7 +58,7 @@ export function TransactionItem({ transaction, categories }: { transaction: any,
                 </div>
                 <div className="transactionSubContainer">
                     <p>{transaction.date}</p>
-                    <p>{transaction.category_id}</p>
+                    <p>{getCategoryname(transaction.category_id)}</p>
                 </div>
             </div>
             <div className="transactionButtonContainer">
