@@ -4,9 +4,26 @@ A small budget tracking application with an Express/SQLite backend and a Next.js
 
 ## Project structure
 
-- `src/` – Express API server (backend)
-- `tests/` – backend test suite
-- `frontend/` – Next.js frontend
+- `backend/` - Express API server (`src/`) and its test suite (`tests/`)
+- `frontend/` - Next.js frontend
+- `docker-compose.yml` - runs backend and frontend together
+
+## Running with Docker
+
+Requires Docker with the Compose plugin. From the project root:
+
+```bash
+docker compose up --build
+```
+
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8080`
+
+The SQLite database is stored in the `db-data` volume, so data survives restarts. `docker compose down -v` also deletes the database.
+
+Code is copied into the images at build time, so rebuild after changing code (`docker compose up -d --build`). For day-to-day development, running both services locally (see below) gives you hot reload.
+
+The frontend fetches data from the browser via `http://localhost:8080`, and server-side via the `INTERNAL_API_URL` environment variable (set to `http://backend:8080` in `docker-compose.yml`).
 
 ## Backend
 
@@ -17,17 +34,19 @@ A small budget tracking application with an Express/SQLite backend and a Next.js
 ### Setup
 
 ```bash
+cd backend
 npm install
 npm start
 ```
 
 The server listens on `http://localhost:8080` by default.
 
-The SQLite database file location can be configured with the `DB_PATH` environment variable; if unset it defaults to `app.db` in the project root.
+The SQLite database file location can be configured with the `DB_PATH` environment variable; if unset it defaults to `app.db` in the working directory.
 
 ### Running tests
 
 ```bash
+cd backend
 npm test
 ```
 
