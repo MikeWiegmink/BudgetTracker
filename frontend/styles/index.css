@@ -80,6 +80,36 @@ button:hover {
     flex-direction: column;
     gap: 0.75rem;
 }
+.categoryMainContainer {
+    display: flex;
+    flex-direction: column;
+    grid-column: 1 / -1;
+}
+.categoryTopRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.categoryAggregationContainer {
+    display: flex;
+    justify-content: flex-end;
+}
+.categorySummaryButton {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    transition: color 0.15s, border-color 0.15s;
+}
+.categorySummaryButton:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+}
 .transactionItemContainer,
 .categoryItemContainer {
     display: grid;

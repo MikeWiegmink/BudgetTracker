@@ -45,43 +45,50 @@ export function CategoryItem({ category }: { category: any }) {
     }
 
     return (
-    <div className="categoryItemContainer">
-        <button onClick={handleClickCategory} className={`categoryName${isSelected ? " selected" : ""}`}>{category.name}</button>
-        <div className="categoryButtonContainer">
-            <button onClick={() => setOpen(true)}>Edit</button>
-            <button
-                className="deleteButton"
-                onClick={() => handleDeleteCategory(category.id)}
-            >
-                Delete
-            </button>
-        </div>
-        {deleteError && <p className="modalError">{deleteError}</p>}
-        {open && (
-            <Modal title="Edit Category" onClose={handleClose}>
-                <form className="modalForm" onSubmit={handleEdit}>
-                <label>
-                    Name
-                    <input
-                        name="name"
-                        type="text"
-                        defaultValue={category.name}
-                        required
-                    />
-                </label>
-                {error && <p className="modalError">{error}</p>}
-                <div className="modalButtons">
-                    <button type="button" className="modalCancelButton" onClick={handleClose}>
-                        Cancel
-                    </button>
-                    <button type="submit" className="modalConfirmButton">
-                        Confirm edit
-                    </button>
+        <div className="categoryItemContainer">
+            <div className="categoryMainContainer">
+                <div className="categoryTopRow">
+                    <button onClick={handleClickCategory} className={`categoryName${isSelected ? " selected" : ""}`}>{category.name}</button>
+                    <div className="categoryButtonContainer">
+                        <button onClick={() => setOpen(true)}>Edit</button>
+                        <button
+                            className="deleteButton"
+                            onClick={() => handleDeleteCategory(category.id)}
+                        >
+                            Delete
+                        </button>
+                    </div>
                 </div>
-                </form>
-            </Modal>
-        )}
-      </div>
+                <div className="categoryAggregationContainer">
+                    <button className="categorySummaryButton">Summary</button>
+                </div>
+            </div>
+            {deleteError && <p className="modalError">{deleteError}</p>}
+            {open && (
+                <Modal title="Edit Category" onClose={handleClose}>
+                    <form className="modalForm" onSubmit={handleEdit}>
+                    <label>
+                        Name
+                        <input
+                            name="name"
+                            type="text"
+                            defaultValue={category.name}
+                            required
+                        />
+                    </label>
+                    {error && <p className="modalError">{error}</p>}
+                    <div className="modalButtons">
+                        <button type="button" className="modalCancelButton" onClick={handleClose}>
+                            Cancel
+                        </button>
+                        <button type="submit" className="modalConfirmButton">
+                            Confirm edit
+                        </button>
+                    </div>
+                    </form>
+                </Modal>
+            )}
+        </div>
     );
 }
 
