@@ -7,6 +7,9 @@ import {
     deleteTransactionById,
     editTransaction,
     deleteCategoryById,
+    addCategory,
+    editCategory,
+    getSummary,
 } from "./api";
 
 function mockFetchOnce({ ok = true, status = 200, body = {} } = {}) {
@@ -89,6 +92,90 @@ describe("api.js", () => {
 
             await expect(getCategoryById(999)).rejects.toThrow(
                 "Failed to fetch category (status 404)"
+            );
+        });
+    });
+
+    describe("getSummary", () => {
+        it("fetches the summary with params as a query string", async () => {
+            const summary = { month: null, total: 30, average: 15, max: 20 };
+            mockFetchOnce({ body: summary });
+
+            const result = await getSummary({ category_id: "2" });
+
+            expect(global.fetch).toHaveBeenCalledWith(
+                "http://localhost:8080/summary?category_id=2"
+            );
+            expect(result).toEqual(summary);
+        });
+
+        it("supports date and category_id combined", async () => {
+            mockFetchOnce({ body: {} });
+
+            await getSummary({ date: "2026-08", category_id: "1" });
+
+            expect(global.fetch).toHaveBeenCalledWith(
+                "http://localhost:8080/summary?date=2026-08&category_id=1"
+            );
+        });
+
+        it("returns null when no transactions are found (404)", async () => {
+            mockFetchOnce({ ok: false, status: 404 });
+
+            await expect(getSummary({ category_id: "9" })).resolves.toBeNull();
+        });
+
+        it("throws an error with the status code on other failures", async () => {
+            mockFetchOnce({ ok: false, status: 500 });
+
+            await expect(getSummary({ category_id: "1" })).rejects.toThrow(
+                "Failed to fetch summary (status 500)"
+            );
+        });
+    });
+
+    describe("addCategory", () => {
+        it("POSTs the name as json and returns the created category", async () => {
+            mockFetchOnce({ body: { id: 4, name: "Travel" } });
+
+            const result = await addCategory("Travel");
+
+            expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/categories", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: "Travel" }),
+            });
+            expect(result).toEqual({ id: 4, name: "Travel" });
+        });
+
+        it("throws an error with the status code when the response is not ok", async () => {
+            mockFetchOnce({ ok: false, status: 409 });
+
+            await expect(addCategory("Food")).rejects.toThrow(
+                "Failed to add category (status 409)"
+            );
+        });
+    });
+
+    describe("editCategory", () => {
+        it("PUTs the new name as json and returns the updated category", async () => {
+            mockFetchOnce({ body: { id: 2, name: "Groceries" } });
+
+            const result = await editCategory(2, "Groceries");
+
+            expect(global.fetch).toHaveBeenCalledWith("http://localhost:8080/categories/2", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: "Groceries" }),
+            });
+            expect(result).toEqual({ id: 2, name: "Groceries" });
+        });
+
+        it("throws an error with the status code when the response is not ok", async () => {
+            mockFetchOnce({ ok: false, status: 404 });
+
+            await expect(editCategory(99, "X")).rejects.toThrow(
+                "Failed to edit category (status 404)"
             );
         });
     });

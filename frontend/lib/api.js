@@ -39,6 +39,21 @@ export async function getCategoryById(id) {
     return res.json();
 }
 
+export async function getSummary(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const res = await fetch(`${API_URL}/summary?${query}`);
+
+    if (res.status === 404) {
+        return null;
+    }
+
+    if (!res.ok) {
+        throw new Error(`Failed to fetch summary (status ${res.status})`);
+    }
+
+    return res.json();
+}
+
 export async function addTransaction(desc, amount, date, category_id) {
     const res = await fetch(`${API_URL}/transactions`, {
         method: "POST",

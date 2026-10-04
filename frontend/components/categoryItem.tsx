@@ -26,7 +26,7 @@ export function CategoryItem({ category }: { category: any }) {
         const form = new FormData(e.currentTarget);
 
         try {
-            console.log(await editCategory(category.id, String(form.get("name"))));
+            await editCategory(category.id, String(form.get("name")));
             setOpen(false);
             router.refresh();
         } catch (err) {
@@ -54,13 +54,13 @@ export function CategoryItem({ category }: { category: any }) {
                         <button
                             className="deleteButton"
                             onClick={() => handleDeleteCategory(category.id)}
-                        >
+                        > 
                             Delete
                         </button>
                     </div>
                 </div>
                 <div className="categoryAggregationContainer">
-                    <button className="categorySummaryButton">Summary</button>
+                    <button className="categorySummaryButton" onClick={()=> router.push(`/summary/?category_id=${category.id}`)}>Summary</button>
                 </div>
             </div>
             {deleteError && <p className="modalError">{deleteError}</p>}
