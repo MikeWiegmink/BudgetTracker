@@ -1,10 +1,15 @@
 import Link from "next/link";
 import PageContainer from "@/components/pageContainer";
 import "@/styles/index.css";
-import { getCategoryById, getSummary } from "@/lib/api";
+import "@/styles/summary.css"
+import { getCategories, getCategoryById, getSummary, getTransactions } from "@/lib/api";
+import { TransactionItem } from "@/components/transactionItem";
+
 
 export default async function Summary({ searchParams }: { searchParams: Promise<{ category_id?: string }> }) {
     const { category_id } = await searchParams;
+    const transactions = category_id ? await getTransactions({category_id: category_id}) : null;
+    const categories = await getCategories();
 
     if (!category_id) {
         return (
@@ -30,14 +35,30 @@ export default async function Summary({ searchParams }: { searchParams: Promise<
             </div>
             {summary ? (
                 <div>
-                    <p>Total: {summary.total}</p>
-                    <p>Average: {summary.average}</p>
-                    <p>Max: {summary.max}</p>
+                    <div className="statsContainer">
+                        <div className="statCard">
+                            <span className="statLabel">Total</span>
+                            <span className="statValue">${summary.total}</span>
+                        </div>
+                        <div className="statCard">
+                            <span className="statLabel">Average</span>
+                            <span className="statValue">${summary.average}</span>
+                        </div>
+                        <div className="statCard">
+                            <span className="statLabel">Max</span>
+                            <span className="statValue">${summary.max}</span>
+                        </div>
+                    </div>
+                    <div className="transactionListContainer">
+                        {transactions.map((t: any) => {
+                            return <TransactionItem key={t.id} transaction={t} categories={categories} />
+                        })}
+                    </div>
                 </div>
             ) : (
                 <p>No transactions found for this category</p>
             )}
-            <Link href="/">Back</Link>
+            <Link className="backButton" href={"/"}>Back</Link>
         </PageContainer>
     );
 }
