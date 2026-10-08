@@ -104,14 +104,24 @@ app.put("/categories/:id", (req, res) => {
 
 // Transactions
 app.get("/transactions", (req, res) => {
-    const { date, category_id } = req.query;
+    const { start_date, end_date, month, category_id } = req.query;
 
     const conditions = [];
     const params = [];
 
-    if (date) {
+    if (start_date) {
+        conditions.push("date >= ?")
+        params.push(start_date)
+    }
+
+    if (end_date) {
+        conditions.push("date <= ?")
+        params.push(end_date)
+    }
+
+    if (month) {
         conditions.push("date LIKE ?");
-        params.push(`%${date}%`);
+        params.push(`%${month}%`);
     }
 
     if (category_id) {
@@ -218,10 +228,15 @@ app.put("/transactions/:id", (req, res) => {
 
 // returns the month, total, average and max of given month and/or category
 app.get("/summary", (req, res) => {
-    const { date, category_id } = req.query;
+    const { date, start_date, end_date, category_id } = req.query;
 
-    if (!date && !category_id) {
+    if (!date && !start_date && !end_date && !category_id) {
         return res.status(400).json({ error: "No parameters provided" });
+    }
+
+    const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+    if ((start_date && !isoDate.test(start_date)) || (end_date && !isoDate.test(end_date))) {
+        return res.status(400).json({ error: "Invalid start_date or end_date format, expected YYYY-MM-DD" });
     }
 
     const conditions = [];
@@ -236,6 +251,15 @@ app.get("/summary", (req, res) => {
         month = match[1];
         conditions.push("date LIKE ?");
         params.push(`${month}%`);
+    }
+
+    if (start_date) {
+        conditions.push("date >= ?");
+        params.push(start_date);
+    }
+    if (end_date) {
+        conditions.push("date <= ?");
+        params.push(end_date);
     }
 
     if (category_id) {
@@ -260,6 +284,8 @@ app.get("/summary", (req, res) => {
 
         return res.status(200).json({
             month: month ?? null,
+            start_date: start_date ?? null,
+            end_date: end_date ?? null,
             total,
             average: Math.round(average * 100) / 100,
             max,
