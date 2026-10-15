@@ -19,7 +19,7 @@ export default async function Summary({ searchParams }: { searchParams: Promise<
                     <h1>Summary</h1>
                     <p>No category selected</p>
                 </div>
-                <Link href="/">Back</Link>
+                <Link className="backButton" href="/">Back</Link>
             </PageContainer>
         );
     }
@@ -36,30 +36,36 @@ export default async function Summary({ searchParams }: { searchParams: Promise<
             </div>
             <form className="dateSelectorContainer" method="get">
                 <input type="hidden" name="category_id" value={category_id} />
-                <label htmlFor="startDate">Start Date:</label>
-                <input type="date" id="startDate" name="start_date" defaultValue={startDate}/>
-                <label htmlFor="endDate">End Date:</label>
-                <input type="date" id="endDate" name="end_date" defaultValue={endDate}/>
-                <button type="submit">Apply</button>
+                <div className="dateSelectorSubContainer">
+                    <div className="dateContainer">
+                        <label className="dateLabel" htmlFor="startDate">Begin Date</label>
+                        <input className="dateInput" type="date" id="startDate" name="start_date" defaultValue={startDate}/>
+                    </div>
+                    <div className="dateContainer">
+                        <label className="dateLabel" htmlFor="endDate">End Date</label>
+                        <input className="dateInput" type="date" id="endDate" name="end_date" defaultValue={endDate}/>
+                    </div>
+                </div>
+                <button type="submit" className="dateSelectorApplyButton">Apply</button>
             </form>
             {summary ? (
                 <div>
                     <div className="statsContainer">
                         <div className="statCard">
                             <span className="statLabel">Total</span>
-                            <span className="statValue">${summary.total}</span>
+                            <span className="statValue">${Number(summary.total).toFixed(2)}</span>
                         </div>
                         <div className="statCard">
                             <span className="statLabel">Average</span>
-                            <span className="statValue">${summary.average}</span>
+                            <span className="statValue">${Number(summary.average).toFixed(2)}</span>
                         </div>
                         <div className="statCard">
                             <span className="statLabel">Max</span>
-                            <span className="statValue">${summary.max}</span>
+                            <span className="statValue">${Number(summary.max).toFixed(2)}</span>
                         </div>
                     </div>
                     <div className="transactionListContainer">
-                        {transactions.map((t: any) => {
+                        {transactions?.map((t: any) => {
                             return <TransactionItem key={t.id} transaction={t} categories={categories} />
                         })}
                     </div>
