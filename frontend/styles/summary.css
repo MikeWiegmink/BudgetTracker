@@ -1,0 +1,102 @@
+.statsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+.statCard {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1rem 1.25rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+.statLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.statValue {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text);
+}
+.backButton,
+.dateSelectorApplyButton {
+    align-self: flex-start;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, filter 0.15s;
+}
+.backButton {
+    color: var(--text-muted);
+}
+.backButton:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+.dateSelectorApplyButton {
+    align-self: center;
+    color: white;
+    background-color: var(--addTransaction);
+}
+.dateSelectorApplyButton:hover {
+    filter: brightness(0.9);
+}
+.backButton:focus-visible,
+.dateSelectorApplyButton:focus-visible,
+.dateInput:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.dateSelectorContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+.dateSelectorSubContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.dateContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.9rem;
+    border-radius: 2rem;
+}
+.dateLabel {
+    font-weight: 600;
+    border-right: 1px solid var(--border);
+    padding-right: 0.5rem;
+}
+.dateInput {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+.dateInput:hover {
+    color: var(--accent);
+}

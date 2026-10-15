@@ -61,7 +61,7 @@ test("GET /transactions filters by date", async () => {
     const { baseUrl, close } = await startTestServer();
 
     try {
-        const res = await fetch(`${baseUrl}/transactions?date=2026-09`);
+        const res = await fetch(`${baseUrl}/transactions?month=2026-09`);
         const body = await res.json();
 
         assert.equal(res.status, 200);
@@ -76,12 +76,85 @@ test("GET /transactions filters by date and category_id combined", async () => {
     const { baseUrl, close } = await startTestServer();
 
     try {
-        const res = await fetch(`${baseUrl}/transactions?date=2026-09&category_id=3`);
+        const res = await fetch(`${baseUrl}/transactions?month=2026-09&category_id=3`);
         const body = await res.json();
 
         assert.equal(res.status, 200);
         assert.equal(body.length, 9);
         assert.ok(body.every((t) => t.category_id === 3 && t.date.includes("2026-09")));
+    } finally {
+        await close();
+    }
+});
+
+test("GET /transactions filters by start_date (inclusive)", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/transactions?start_date=2026-11-01`);
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+        assert.ok(body.length > 0);
+        assert.ok(body.every((t) => t.date >= "2026-11-01"));
+    } finally {
+        await close();
+    }
+});
+
+test("GET /transactions filters by end_date (inclusive)", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/transactions?end_date=2026-06-30`);
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+        assert.ok(body.length > 0);
+        assert.ok(body.every((t) => t.date <= "2026-06-30"));
+    } finally {
+        await close();
+    }
+});
+
+test("GET /transactions includes transactions on the start_date and end_date boundaries", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/transactions?start_date=2026-10-08&end_date=2026-10-08`);
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+        assert.deepEqual(body.map((t) => t.id).sort((a, b) => a - b), [48, 82]);
+    } finally {
+        await close();
+    }
+});
+
+test("GET /transactions filters by start_date, end_date and category_id combined", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/transactions?start_date=2026-10-01&end_date=2026-10-08&category_id=2`);
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+        assert.ok(body.length > 0);
+        assert.ok(body.every((t) => t.category_id === 2 && t.date >= "2026-10-01" && t.date <= "2026-10-08"));
+    } finally {
+        await close();
+    }
+});
+
+test("GET /transactions returns empty array when start_date is after end_date", async () => {
+    const { baseUrl, close } = await startTestServer();
+
+    try {
+        const res = await fetch(`${baseUrl}/transactions?start_date=2026-10-08&end_date=2026-10-01`);
+        const body = await res.json();
+
+        assert.equal(res.status, 200);
+        assert.deepEqual(body, []);
     } finally {
         await close();
     }
