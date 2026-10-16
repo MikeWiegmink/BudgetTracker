@@ -5,7 +5,29 @@ import { useRouter } from "next/navigation";
 import Modal from "./modal";
 import { addTransaction, deleteTransactionById, editTransaction } from "@/lib/api";
 
-export function TransactionItem({ transaction, categories }: { transaction: any, categories: any[] }) {
+const INITIAL_COUNT = 5;
+const PAGE_SIZE = 10;
+
+export function TransactionList({ transactions, categories }: { transactions: any[], categories: any[] }) {
+    const [limit, setLimit] = useState(INITIAL_COUNT);
+
+    return (
+        <div className="transactionListContainer">
+            {transactions.slice(0, limit).map((t : any) => {
+                return <TransactionItem key={t.id} transaction={t} categories={categories}/>
+            })}
+            {limit < transactions.length && (
+                <div className="loadMoreTransactionsContainer">
+                    <button type="button" className="loadMoreTransactionsButton" onClick={() => setLimit(limit + PAGE_SIZE)}>
+                        + Load more Transactions ({Math.min(PAGE_SIZE, transactions.length - limit)})
+                    </button>
+                </div>
+            )}
+        </div>
+    )
+}
+
+function TransactionItem({ transaction, categories }: { transaction: any, categories: any[] }) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [error, setError] = useState("");

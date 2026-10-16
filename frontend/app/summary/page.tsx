@@ -3,7 +3,7 @@ import PageContainer from "@/components/pageContainer";
 import "@/styles/index.css";
 import "@/styles/summary.css"
 import { getCategories, getCategoryById, getSummary, getTransactions } from "@/lib/api";
-import { TransactionItem } from "@/components/transactionItem";
+import { TransactionList } from "@/components/transactionItem";
 
 export default async function Summary({ searchParams }: { searchParams: Promise<{ category_id?: string; start_date?: string; end_date?: string }> }) {
     const { category_id, start_date, end_date } = await searchParams;
@@ -64,11 +64,7 @@ export default async function Summary({ searchParams }: { searchParams: Promise<
                             <span className="statValue">${Number(summary.max).toFixed(2)}</span>
                         </div>
                     </div>
-                    <div className="transactionListContainer">
-                        {transactions?.map((t: any) => {
-                            return <TransactionItem key={t.id} transaction={t} categories={categories} />
-                        })}
-                    </div>
+                    <TransactionList key={`${category_id}-${start_date}-${end_date}`} transactions={transactions} categories={categories} />
                 </div>
             ) : (
                 <p>No transactions found for this category</p>

@@ -110,6 +110,7 @@ button:hover {
     color: var(--text);
     border-color: var(--text-muted);
 }
+.loadMoreTransactionsContainer,
 .transactionItemContainer,
 .categoryItemContainer {
     display: grid;
@@ -260,4 +261,11 @@ button.deleteButton {
 .categoryName.selected {
     text-decoration: underline;
     color: #2563eb;
+}
+.loadMoreTransactionsContainer {
+    background-color: var(--addTransaction);
+}
+.loadMoreTransactionsButton {
+    font-weight: 600;
+    color: white;
 }
