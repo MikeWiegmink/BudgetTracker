@@ -1,6 +1,6 @@
 import PageContainer from "@/components/pageContainer";
 import "@/styles/index.css";
-import { TransactionItem, TransactionHeader } from "@/components/transactionItem";
+import { TransactionHeader, TransactionList } from "@/components/transactionItem";
 import { CategoryItem, CategoryHeader } from "@/components/categoryItem";
 import { getTransactions, getCategories } from "@/lib/api"
 
@@ -10,13 +10,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
 
     const getTransactionList = async () => {
         const transactions = await getTransactions(category ? { category_id: category } : {})
-
         return (
-            <div className="transactionListContainer">
-                {transactions.map((t : any) => {
-                    return <TransactionItem key={t.id} transaction={t} categories={categoryOptions} />
-                })}
-            </div>
+            <TransactionList key={category ?? "all"} transactions={transactions} categories={categoryOptions}/>
         )
     }
 

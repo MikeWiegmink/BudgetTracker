@@ -2,3 +2,5 @@ node_modules
 *.db
 .next/
 .env*
+
+backend/scripts/
