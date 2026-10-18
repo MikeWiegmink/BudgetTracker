@@ -134,8 +134,8 @@ app.get("/transactions", (req, res) => {
     }
 
     const query = conditions.length
-        ? `SELECT * FROM Transactions WHERE ${conditions.join(" AND ")}`
-        : "SELECT * FROM Transactions";
+        ? `SELECT * FROM Transactions WHERE ${conditions.join(" AND ")} ORDER BY date DESC`
+        : "SELECT * FROM Transactions ORDER BY date DESC";
 
     try {
         const stmt = db.prepare(query);
