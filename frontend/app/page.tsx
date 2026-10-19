@@ -1,17 +1,21 @@
 import PageContainer from "@/components/pageContainer";
 import "@/styles/index.css";
-import { TransactionHeader, TransactionList } from "@/components/transactionItem";
+import { TransactionList } from "@/components/transactionItem";
 import { CategoryItem, CategoryHeader } from "@/components/categoryItem";
 import { getTransactions, getCategories } from "@/lib/api"
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string }> }) {
-    const { category } = await searchParams;
+export default async function Home({ searchParams }: { searchParams: Promise<{ category?: string; start_date?: string; end_date?: string }> }) {
+    const { category, start_date, end_date } = await searchParams;
     const categoryOptions = await getCategories();
 
     const getTransactionList = async () => {
-        const transactions = await getTransactions(category ? { category_id: category } : {})
+        const transactions = await getTransactions({
+            ...(category && { category_id: category }),
+            ...(start_date && { start_date }),
+            ...(end_date && { end_date }),
+        })
         return (
-            <TransactionList key={category ?? "all"} transactions={transactions} categories={categoryOptions}/>
+            <TransactionList key={`${category ?? "all"}-${start_date}-${end_date}`} transactions={transactions} categories={categoryOptions}/>
         )
     }
 
@@ -32,10 +36,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ c
                 <p>A budget tracking app by Mike Wiegmink</p>
             </div>
             <div className="contentContainer">
-                <div className="transactionContainer">
-                    <TransactionHeader categories={categoryOptions} />
-                    {getTransactionList()}
-                </div>
+                {getTransactionList()}
                 <div className="categoryContainer">
                     <CategoryHeader />
                     {getCategoryList()}

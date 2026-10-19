@@ -34,20 +34,6 @@ export default async function Summary({ searchParams }: { searchParams: Promise<
             <div className="headerContainer">
                 <h1>Summary: {category.name}</h1>
             </div>
-            <form className="dateSelectorContainer" method="get">
-                <input type="hidden" name="category_id" value={category_id} />
-                <div className="dateSelectorSubContainer">
-                    <div className="dateContainer">
-                        <label className="dateLabel" htmlFor="startDate">Begin Date</label>
-                        <input className="dateInput" type="date" id="startDate" name="start_date" defaultValue={startDate}/>
-                    </div>
-                    <div className="dateContainer">
-                        <label className="dateLabel" htmlFor="endDate">End Date</label>
-                        <input className="dateInput" type="date" id="endDate" name="end_date" defaultValue={endDate}/>
-                    </div>
-                </div>
-                <button type="submit" className="dateSelectorApplyButton">Apply</button>
-            </form>
             {summary ? (
                 <div>
                     <div className="statsContainer">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Modal from "./modal";
 import { addTransaction, deleteTransactionById, editTransaction } from "@/lib/api";
 
@@ -12,17 +12,20 @@ export function TransactionList({ transactions, categories }: { transactions: an
     const [limit, setLimit] = useState(INITIAL_COUNT);
 
     return (
-        <div className="transactionListContainer">
-            {transactions.slice(0, limit).map((t : any) => {
-                return <TransactionItem key={t.id} transaction={t} categories={categories}/>
-            })}
-            {limit < transactions.length && (
-                <div className="loadMoreTransactionsContainer">
-                    <button type="button" className="loadMoreTransactionsButton" onClick={() => setLimit(limit + PAGE_SIZE)}>
-                        + Load more Transactions ({Math.min(PAGE_SIZE, transactions.length - limit)})
-                    </button>
-                </div>
-            )}
+        <div className="transactionContainer">
+            <TransactionHeader categories={categories}/>
+            <div className="transactionListContainer">
+                {transactions.slice(0, limit).map((t : any) => {
+                    return <TransactionItem key={t.id} transaction={t} categories={categories}/>
+                })}
+                {limit < transactions.length && (
+                    <div className="loadMoreTransactionsContainer">
+                        <button type="button" className="loadMoreTransactionsButton" onClick={() => setLimit(limit + PAGE_SIZE)}>
+                            + Load more Transactions ({Math.min(PAGE_SIZE, transactions.length - limit)})
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }
@@ -123,10 +126,16 @@ function TransactionItem({ transaction, categories }: { transaction: any, catego
     );
 }
 
-export function TransactionHeader({ categories }: { categories: any[] }) {
+function TransactionHeader({ categories }: { categories: any[] }) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [error, setError] = useState("");
+
+    const searchParams = useSearchParams();
+    const startDate = searchParams.get("start_date") ?? "2000-01-01";
+    const endDate = searchParams.get("end_date") ?? new Date().toISOString().split('T')[0];
+    // keep any other active filters (category / category_id) when the date form submits
+    const otherParams = Array.from(searchParams.entries()).filter(([key]) => key !== "start_date" && key !== "end_date");
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
@@ -155,8 +164,24 @@ export function TransactionHeader({ categories }: { categories: any[] }) {
 
     return (
         <div className="transactionHeaderContainer">
-            <h1 className="headerText">Transactions</h1>
-            <button className="addTransactionButton" onClick={() => setOpen(true)}>+ Add</button>
+            <div className="transactionHeaderTitle">
+                <h1 className="headerText">Transactions</h1>
+                <button className="addTransactionButton" onClick={() => setOpen(true)}>+ Add</button>
+            </div>
+            <form className="transactionHeaderDateSelectorRow" method="get">
+                {otherParams.map(([key, value]) => (
+                    <input key={key} type="hidden" name={key} value={value} />
+                ))}
+                <div className="dateContainer">
+                    <label className="dateLabel" htmlFor="startDate">Begin Date</label>
+                    <input className="dateInput" type="date" id="startDate" name="start_date" defaultValue={startDate}/>
+                </div>
+                <div className="dateContainer">
+                    <label className="dateLabel" htmlFor="endDate">End Date</label>
+                    <input className="dateInput" type="date" id="endDate" name="end_date" defaultValue={endDate}/>
+                </div>
+                <button type="submit" className="dateSelectorApplyButton">Apply</button>
+            </form>
             {open && (
                 <Modal title="Add Transaction" onClose={handleClose}>
                     <form className="modalForm" onSubmit={handleSubmit}>
