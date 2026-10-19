@@ -28,35 +28,22 @@
     font-weight: 700;
     color: var(--text);
 }
-.backButton,
-.dateSelectorApplyButton {
+.backButton {
     align-self: flex-start;
     padding: 0.4rem 1rem;
     font-size: 0.9rem;
     font-weight: 600;
+    color: var(--text-muted);
     border: 1px solid var(--border);
     border-radius: 2rem;
     cursor: pointer;
-    transition: color 0.15s, border-color 0.15s, filter 0.15s;
-}
-.backButton {
-    color: var(--text-muted);
+    transition: color 0.15s, border-color 0.15s;
 }
 .backButton:hover {
     color: var(--text);
     border-color: var(--text-muted);
 }
-.dateSelectorApplyButton {
-    align-self: center;
-    color: white;
-    background-color: var(--addTransaction);
-}
-.dateSelectorApplyButton:hover {
-    filter: brightness(0.9);
-}
-.backButton:focus-visible,
-.dateSelectorApplyButton:focus-visible,
-.dateInput:focus-visible {
+.backButton:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
@@ -74,29 +61,4 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: 1rem;
-}
-.dateContainer {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
-    border: 1px solid var(--border);
-    padding: 0.4rem 0.9rem;
-    border-radius: 2rem;
-}
-.dateLabel {
-    font-weight: 600;
-    border-right: 1px solid var(--border);
-    padding-right: 0.5rem;
-}
-.dateInput {
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font: inherit;
-    cursor: pointer;
-    transition: color 0.15s;
-}
-.dateInput:hover {
-    color: var(--accent);
 }
